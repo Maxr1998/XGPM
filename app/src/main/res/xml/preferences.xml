@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/category_drawer">
+        <CheckBoxPreference
+            android:key="drawer_hide_store"
+            android:title="@string/drawer_hide_store" />
+        <CheckBoxPreference
+            android:key="drawer_hide_help"
+            android:title="@string/drawer_hide_help" />
+        <CheckBoxPreference
+            android:key="drawer_hide_feedback"
+            android:title="@string/drawer_hide_feedback" />
+        <CheckBoxPreference
+            android:key="drawer_hide_unlimited"
+            android:title="@string/drawer_hide_unlimited" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/category_now_playing">
+        <CheckBoxPreference
+            android:key="np_resize_covers"
+            android:title="@string/np_resize_covers" />
+        <CheckBoxPreference
+            android:key="np_remove_drop_shadow"
+            android:summary="@string/np_remove_drop_shadow_summary"
+            android:title="@string/np_remove_drop_shadow" />
+        <CheckBoxPreference
+            android:key="np_tint_icons"
+            android:summary="@string/np_tint_icons_summary"
+            android:title="@string/np_tint_icons" />
+    </PreferenceCategory>
+</PreferenceScreen>

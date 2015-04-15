@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">XGPM</string>
+
+    <string name="category_drawer">Navigation drawer</string>
+    <string name="drawer_hide_store">Hide \"Shop\" shortcut</string>
+    <string name="drawer_hide_help">Hide \"Help\" shortcut</string>
+    <string name="drawer_hide_feedback">Hide \"Send feedback\" shortcut</string>
+    <string name="drawer_hide_unlimited">Hide \"GET UNLIMITED MUSIC\" shortcut</string>
+
+    <string name="category_now_playing">Now playing screen</string>
+    <string name="np_resize_covers">Resize album arts that they aren\'t hidden under controls</string>
+    <string name="np_remove_drop_shadow">Remove drop shadow over cover</string>
+    <string name="np_remove_drop_shadow_summary">Reboot required!</string>
+    <string name="np_tint_icons">Tint icons with color extracted from cover</string>
+    <string name="np_tint_icons_summary">NOTE: Sometimes colors aren\'t updated immediately, I don\'t know why this happens…</string>
+
+
+</resources>

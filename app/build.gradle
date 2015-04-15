@@ -1,0 +1,52 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        applicationId "de.Maxr1998.xposed.gpm"
+        minSdkVersion 15
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    signingConfigs {
+        main {
+            storeFile file("../../../app_maxlock_key")
+            keyAlias 'MaxLock'
+            storePassword System.getenv("KSTOREPWD")
+            keyPassword System.getenv("KEYPWD")
+        }
+    }
+    buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources false
+            signingConfig signingConfigs.main
+            debuggable false
+        }
+        debug {
+            signingConfig signingConfigs.main
+            debuggable true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+dependencies {
+    compile 'com.android.support:appcompat-v7:22.0.0'
+    compile 'com.android.support:palette-v7:22.0.0'
+    provided files('lib/XposedBridgeApi-20150213.jar')
+}
