@@ -16,7 +16,12 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_now_playing">
         <CheckBoxPreference
+            android:key="np_add_eq"
+            android:summary="@string/np_add_eq_summary"
+            android:title="@string/np_add_eq" />
+        <CheckBoxPreference
             android:key="np_resize_covers"
+            android:summary="@string/np_resize_covers_summary"
             android:title="@string/np_resize_covers" />
         <CheckBoxPreference
             android:key="np_remove_drop_shadow"

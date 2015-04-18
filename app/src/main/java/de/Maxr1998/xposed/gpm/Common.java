@@ -9,6 +9,7 @@ public class Common {
     public static final String DRAWER_HIDE_FEEDBACK = "drawer_hide_feedback";
     public static final String DRAWER_HIDE_UNLIMITED = "drawer_hide_unlimited";
     //
+    public static final String NP_ADD_EQ_SHORTCUT = "np_add_eq";
     public static final String NP_RESIZE_COVERS = "np_resize_covers";
     public static final String NP_REMOVE_DROP_SHADOW = "np_remove_drop_shadow";
     public static final String NP_TINT_ICONS = "np_tint_icons";

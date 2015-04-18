@@ -8,11 +8,14 @@
     <string name="drawer_hide_unlimited">Hide \"GET UNLIMITED MUSIC\" shortcut</string>
 
     <string name="category_now_playing">Now playing screen</string>
-    <string name="np_resize_covers">Resize album arts that they aren\'t hidden under controls</string>
+    <string name="np_add_eq">Add equalizer shortcut</string>
+    <string name="np_add_eq_summary">Add an equalizer shortcut next to the queue button</string>
+    <string name="np_resize_covers">Resize album art</string>
+    <string name="np_resize_covers_summary">Make album art fully visible on screen, not hiding parts of it behind the control bars</string>
     <string name="np_remove_drop_shadow">Remove drop shadow over cover</string>
     <string name="np_remove_drop_shadow_summary">Reboot required!</string>
     <string name="np_tint_icons">Tint icons with color extracted from cover</string>
-    <string name="np_tint_icons_summary">NOTE: Sometimes colors aren\'t updated immediately, I don\'t know why this happens…</string>
+    <string name="np_tint_icons_summary">NOTE: Sometimes color isn\'t updated anymore, just minimize and reopen GPM</string>
 
 
 </resources>

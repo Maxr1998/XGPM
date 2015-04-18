@@ -1,5 +1,8 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.res.XModuleResources;
 import android.content.res.XResources;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -11,6 +14,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ScaleDrawable;
 import android.os.Build;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -18,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
 import de.Maxr1998.xposed.gpm.Common;
+import de.Maxr1998.xposed.gpm.R;
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -27,6 +32,7 @@ import de.robv.android.xposed.callbacks.XC_LayoutInflated;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
+import static de.Maxr1998.xposed.gpm.Common.MODULE_PATH;
 import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
@@ -35,6 +41,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
     private XC_LayoutInflated.LayoutInflatedParam exLIPar;
     private int lastColor = 0;
     private Object nowPlayingScreenFragment;
+    private ImageButton eQButton;
 
     @Override
     public void handleInitPackageResources(final XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
@@ -56,6 +63,17 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
             public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
                 PREFS.reload();
                 exLIPar = lIParam;
+                // Add EQ button
+                if (PREFS.getBoolean(Common.NP_ADD_EQ_SHORTCUT, false)) {
+                    RelativeLayout header = (RelativeLayout) lIParam.view.findViewById(lIParam.res.getIdentifier("top_wrapper_right", "id", GPM));
+                    header.addView(getEQButton(header, resParam.res), header.getChildCount() - 1);
+                    RelativeLayout.LayoutParams overflow = new RelativeLayout.LayoutParams(
+                            exLIPar.res.getDimensionPixelSize(lIParam.res.getIdentifier("nowplaying_screen_info_block_width", "dimen", GPM)),
+                            exLIPar.res.getDimensionPixelSize(lIParam.res.getIdentifier("nowplaying_screen_info_block_height", "dimen", GPM)));
+                    overflow.addRule(RelativeLayout.RIGHT_OF, lIParam.res.getIdentifier("plain", "id", GPM));
+                    header.findViewById(lIParam.res.getIdentifier("overflow", "id", GPM)).setLayoutParams(overflow);
+                }
+                // Resize covers
                 if (PREFS.getBoolean(Common.NP_RESIZE_COVERS, false)) {
                     View pager = lIParam.view.findViewById(lIParam.res.getIdentifier("art_pager", "id", GPM));
                     RelativeLayout.LayoutParams pagerLayoutParams = (RelativeLayout.LayoutParams) pager.getLayoutParams();
@@ -63,11 +81,41 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                     pagerLayoutParams.addRule(RelativeLayout.ABOVE, lIParam.res.getIdentifier("play_controls", "id", GPM));
                     pager.setLayoutParams(pagerLayoutParams);
                 }
+                // Tint graphics
                 if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
                     tintGraphics();
                 }
             }
         });
+    }
+
+    private ImageButton getEQButton(RelativeLayout header, XResources res) {
+        eQButton = new ImageButton(header.getContext());
+        eQButton.setId(exLIPar.res.getIdentifier("plain", "id", GPM));
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                exLIPar.res.getDimensionPixelSize(exLIPar.res.getIdentifier("nowplaying_screen_info_block_width", "dimen", GPM)),
+                exLIPar.res.getDimensionPixelSize(exLIPar.res.getIdentifier("nowplaying_screen_info_block_height", "dimen", GPM)));
+        params.addRule(RelativeLayout.RIGHT_OF, exLIPar.res.getIdentifier("play_pause_header", "id", GPM));
+        eQButton.setLayoutParams(params);
+        XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, res);
+        eQButton.setImageDrawable(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? modRes.getDrawable(R.drawable.ic_equalizer_black_24dp, null) : modRes.getDrawable(R.drawable.ic_equalizer_black_24dp));
+        eQButton.setScaleType(ImageView.ScaleType.CENTER);
+        eQButton.setBackgroundResource(0);
+        eQButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent eqIntent = new Intent("android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL");
+                int i = (int) XposedHelpers.callStaticMethod(XposedHelpers.findClass(GPM + ".utils.MusicUtils", exLIPar.view.getContext().getClassLoader()), "getAudioSessionId");
+                if (i != -1) {
+                    eqIntent.putExtra("android.media.extra.AUDIO_SESSION", i);
+                } else {
+                    Log.w("MusicSettings", "Failed to get valid audio session id");
+                }
+                ((Activity) view.getContext()).startActivityForResult(eqIntent, 26);
+            }
+        });
+        eQButton.setVisibility(View.GONE);
+        return eQButton;
     }
 
     @Override
@@ -88,13 +136,24 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                 }
             }
         });
-        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onClick", View.class, new XC_MethodHook() {
+        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "updateQueueSwitcherState", new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 PREFS.reload();
                 if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
                     nowPlayingScreenFragment = param.thisObject;
                     tintGraphics();
+                }
+            }
+        });
+
+        // Handle visibility of EQ Button
+        Class<?> estate = XposedHelpers.findClass(GPM + ".widgets.ExpandingScrollView.ExpandingState", lPParam.classLoader);
+        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onExpandingStateChanged", estate.getEnclosingClass(), estate, estate, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                if (eQButton != null) {
+                    eQButton.setVisibility(((View) XposedHelpers.getObjectField(param.thisObject, "mQueueSwitcher")).getVisibility());
                 }
             }
         });
@@ -129,11 +188,9 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         if (nowPlayingScreenFragment == null) {
             return;
         }
-        System.out.println("Queue tint");
         ImageButton queue = (ImageButton) exLIPar.view.findViewById(exLIPar.res.getIdentifier("queue_switcher", "id", GPM));
         if (XposedHelpers.getBooleanField(nowPlayingScreenFragment, "mQueueShown")) {
             queue.setColorFilter(lastColor);
-            System.out.println("Queue visible!");
         } else queue.clearColorFilter();
     }
 }
