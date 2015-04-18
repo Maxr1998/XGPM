@@ -98,6 +98,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         params.addRule(RelativeLayout.RIGHT_OF, exLIPar.res.getIdentifier("play_pause_header", "id", GPM));
         eQButton.setLayoutParams(params);
         XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, res);
+        //noinspection deprecation
         eQButton.setImageDrawable(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? modRes.getDrawable(R.drawable.ic_equalizer_black_24dp, null) : modRes.getDrawable(R.drawable.ic_equalizer_black_24dp));
         eQButton.setScaleType(ImageView.ScaleType.CENTER);
         eQButton.setBackgroundResource(0);
