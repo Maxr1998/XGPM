@@ -48,6 +48,9 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         if (!resParam.packageName.equals(GPM))
             return;
 
+        // Replace overflow button
+        resParam.res.setReplacement(GPM, "drawable", "play_overflow_menu_large", XModuleResources.createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
+
         // Remove drop shadow from album art
         if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
             resParam.res.setReplacement(GPM, "drawable", "now_playing_art_scrim", new XResources.DrawableLoader() {
