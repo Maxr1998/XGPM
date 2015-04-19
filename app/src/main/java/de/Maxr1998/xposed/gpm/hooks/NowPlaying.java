@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.Maxr1998.xposed.gpm.R;
@@ -115,7 +116,12 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                 } else {
                     Log.w("MusicSettings", "Failed to get valid audio session id");
                 }
-                ((Activity) view.getContext()).startActivityForResult(eqIntent, 26);
+                try {
+                    ((Activity) view.getContext()).startActivityForResult(eqIntent, 26);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(view.getContext(), "Couldn't find an Equalizer app. Try to install DSP Manager or similar", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         eQButton.setVisibility(View.GONE);
