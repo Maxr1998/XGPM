@@ -46,7 +46,7 @@ repositories {
     }
 }
 dependencies {
-    compile 'com.android.support:appcompat-v7:22.0.0'
-    compile 'com.android.support:palette-v7:22.0.0'
+    compile 'com.android.support:appcompat-v7:22.1.0'
+    compile 'com.android.support:palette-v7:22.1.0'
     provided files('lib/XposedBridgeApi-20150213.jar')
 }
