@@ -158,8 +158,9 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         });
 
         // Handle visibility of EQ Button
-        Class<?> estate = XposedHelpers.findClass(GPM + ".widgets.ExpandingScrollView.ExpandingState", lPParam.classLoader);
-        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onExpandingStateChanged", estate.getEnclosingClass(), estate, estate, new XC_MethodHook() {
+        String exScrollView = GPM + ".widgets.ExpandingScrollView";
+        String exState = exScrollView + ".ExpandingState";
+        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onExpandingStateChanged", exScrollView, exState, exState, new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 if (eQButton != null) {
