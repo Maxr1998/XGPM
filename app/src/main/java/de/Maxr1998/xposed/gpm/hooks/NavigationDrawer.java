@@ -41,12 +41,11 @@ public class NavigationDrawer implements IXposedHookLoadPackage {
                 PREFS.reload();
                 Object[] result = (Object[]) param.getResult();
                 ArrayList<?> screens = new ArrayList<>(Arrays.asList(result));
-                Object[] allScreens = (Object[]) getStaticObjectField(findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader), "FREE_ITEM_SCREENS");
+                Object[] allScreens = (Object[]) getStaticObjectField(findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader), "SIDELOADED_OR_LOCKER_SCREENS");
                 for (int i = 0; i < screens.size(); i++) {
                     Object o = screens.get(i);
-                    if ((o == allScreens[4] && PREFS.getBoolean(Common.DRAWER_HIDE_STORE, false)) ||
-                            (o == allScreens[6] && PREFS.getBoolean(Common.DRAWER_HIDE_HELP, false)) ||
-                            (o == allScreens[7] && PREFS.getBoolean(Common.DRAWER_HIDE_FEEDBACK, false))) {
+                    if ((o == allScreens[3] && PREFS.getBoolean(Common.DRAWER_HIDE_HELP, false)) ||
+                            (o == allScreens[4] && PREFS.getBoolean(Common.DRAWER_HIDE_FEEDBACK, false))) {
                         screens.remove(i);
                         i--;
                     }

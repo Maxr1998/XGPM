@@ -2,10 +2,9 @@
     <string name="app_name">XGPM</string>
 
     <string name="category_drawer">Navigation drawer</string>
-    <string name="drawer_hide_store">Hide \"Shop\" shortcut</string>
-    <string name="drawer_hide_help">Hide \"Help\" shortcut</string>
-    <string name="drawer_hide_feedback">Hide \"Send feedback\" shortcut</string>
-    <string name="drawer_hide_unlimited">Hide \"GET UNLIMITED MUSIC\" shortcut</string>
+    <string name="drawer_hide_help">Hide \"Help\" item</string>
+    <string name="drawer_hide_feedback">Hide \"Send feedback\" item</string>
+    <string name="drawer_hide_unlimited">Hide subscription shortcut</string>
 
     <string name="category_now_playing">Now playing screen</string>
     <string name="np_add_eq">Add equalizer shortcut</string>

@@ -2,9 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/category_drawer">
         <CheckBoxPreference
-            android:key="drawer_hide_store"
-            android:title="@string/drawer_hide_store" />
-        <CheckBoxPreference
             android:key="drawer_hide_help"
             android:title="@string/drawer_hide_help" />
         <CheckBoxPreference
