@@ -4,7 +4,7 @@ public class Common {
     public static final String XGPM = "de.Maxr1998.xposed.gpm";
     public static final String GPM = "com.google.android.music";
     //
-    public static final String DRAWER_HIDE_STORE = "drawer_hide_store";
+    public static final String ALBUM_GRID_THREE_COLUMNS = "album_grid_three_columns";
     public static final String DRAWER_HIDE_HELP = "drawer_hide_help";
     public static final String DRAWER_HIDE_FEEDBACK = "drawer_hide_feedback";
     public static final String DRAWER_HIDE_UNLIMITED = "drawer_hide_unlimited";
