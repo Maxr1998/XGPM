@@ -12,6 +12,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ScaleDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
@@ -20,6 +22,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import de.Maxr1998.xposed.gpm.Common;
@@ -50,7 +53,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
             return;
 
         // Replace overflow button
-        resParam.res.setReplacement(GPM, "drawable", "play_overflow_menu_large", XModuleResources.createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
+        resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", XModuleResources.createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
 
         // Remove drop shadow from album art
         if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
@@ -84,6 +87,22 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                     pagerLayoutParams.addRule(RelativeLayout.BELOW, lIParam.res.getIdentifier("header_pager", "id", GPM));
                     pagerLayoutParams.addRule(RelativeLayout.ABOVE, lIParam.res.getIdentifier("play_controls", "id", GPM));
                     pager.setLayoutParams(pagerLayoutParams);
+                }
+                // Improve visibility
+                if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
+                    ShapeDrawable shape = new ShapeDrawable(new OvalShape());
+                    shape.getPaint().setColor(Color.parseColor("#AA000000"));
+                    ImageView repeat = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("repeat", "id", GPM)),
+                            shuffle = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("shuffle", "id", GPM));
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        repeat.setBackground(shape);
+                        shuffle.setBackground(shape);
+                    } else {
+                        //noinspection deprecation
+                        repeat.setBackgroundDrawable(shape);
+                        //noinspection deprecation
+                        shuffle.setBackgroundDrawable(shape);
+                    }
                 }
                 // Tint graphics
                 if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
@@ -172,7 +191,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
 
     @Override
     public void onGenerated(Palette palette) {
-        lastColor = palette.getVibrantColor(Color.YELLOW);
+        lastColor = palette.getVibrantColor(Color.parseColor("#9E9E9E"));
         tintGraphics();
     }
 
@@ -180,13 +199,11 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         if (lastColor == 0) {
             return;
         }
-        ImageButton thumbsUp = (ImageButton) exLIPar.view.findViewById(exLIPar.res.getIdentifier("thumbsup", "id", GPM)),
-                thumbsDown = (ImageButton) exLIPar.view.findViewById(exLIPar.res.getIdentifier("thumbsdown", "id", GPM)),
-                playPause = (ImageButton) exLIPar.view.findViewById(exLIPar.res.getIdentifier("pause", "id", GPM));
+        ImageButton playPause = (ImageButton) exLIPar.view.findViewById(exLIPar.res.getIdentifier("pause", "id", GPM));
         SeekBar seekBar = (SeekBar) exLIPar.view.findViewById(exLIPar.res.getIdentifier("progress", "id", "android"));
 
-        thumbsUp.setColorFilter(lastColor);
-        thumbsDown.setColorFilter(lastColor);
+        /*thumbsUp.setColorFilter(lastColor);
+        thumbsDown.setColorFilter(lastColor);*/
         LayerDrawable progress = (LayerDrawable) seekBar.getProgressDrawable().getCurrent();
         ClipDrawable clipProgress = (ClipDrawable) progress.findDrawableByLayerId(exLIPar.res.getIdentifier("progress", "id", "android"));
         clipProgress.setColorFilter(lastColor, PorterDuff.Mode.SRC_IN);
@@ -194,6 +211,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
             ScaleDrawable thumb = (ScaleDrawable) seekBar.getThumb();
             thumb.setColorFilter(lastColor, PorterDuff.Mode.SRC_IN);
         }
+        ((TextView) exLIPar.view.findViewById(exLIPar.res.getIdentifier("currenttime", "id", GPM))).setTextColor(lastColor);
         playPause.getBackground().setColorFilter(lastColor, PorterDuff.Mode.SRC_ATOP);
 
         if (nowPlayingScreenFragment == null) {
