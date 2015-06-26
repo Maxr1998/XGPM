@@ -10,20 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="?attr/colorPrimary"
+        android:elevation="4dp"
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/preference_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <FrameLayout
-            android:id="@+id/preference_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="@drawable/toolbar_shadow_pre_lp" />
-    </RelativeLayout>
+        android:layout_height="match_parent" />
 </LinearLayout>
