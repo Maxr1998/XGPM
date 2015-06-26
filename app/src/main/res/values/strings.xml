@@ -4,7 +4,7 @@
     <string name="reboot_required_summary">Reboot required!</string>
 
     <string name="category_main">Main</string>
-    <string name="default_my_library">Show "My Library" as default screen on start</string>
+    <string name="default_my_library">Show "My Library" as default screen</string>
     <string name="album_grid_three_columns">Show three columns in album grids</string>
 
     <string name="category_drawer">Navigation drawer</string>
