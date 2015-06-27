@@ -8,4 +8,5 @@
         <item name="colorAccent">#ee0000</item>
     </style>
 
+    <dimen name="controls_height">80dp</dimen>
 </resources>

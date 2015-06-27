@@ -1,7 +1,9 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.content.res.XModuleResources;
 import android.content.res.XResources;
 import android.graphics.Color;
@@ -12,8 +14,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ScaleDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.OvalShape;
 import android.os.Build;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
@@ -35,6 +35,7 @@ import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LayoutInflated;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
+import static android.content.res.XModuleResources.createInstance;
 import static de.Maxr1998.xposed.gpm.Common.GPM;
 import static de.Maxr1998.xposed.gpm.Common.MODULE_PATH;
 import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
@@ -53,7 +54,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
             return;
 
         // Replace overflow button
-        resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", XModuleResources.createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
+        resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
 
         // Remove drop shadow from album art
         if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
@@ -63,6 +64,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                     return new ColorDrawable(0);
                 }
             });
+            resParam.res.setReplacement(GPM, "dimen", "rating_controls_now_playing_page", createInstance(MODULE_PATH, resParam.res).fwd(R.dimen.controls_height));
         }
 
         resParam.res.hookLayout(GPM, "layout", "nowplaying_screen", new XC_LayoutInflated() {
@@ -70,16 +72,42 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
             public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
                 PREFS.reload();
                 exLIPar = lIParam;
+                // Global vars
+                RelativeLayout header = (RelativeLayout) lIParam.view.findViewById(lIParam.res.getIdentifier("top_wrapper_right", "id", GPM));
+                View queueSwitcher = header.findViewById(lIParam.res.getIdentifier("queue_switcher", "id", GPM));
+                View overflow = header.findViewById(lIParam.res.getIdentifier("overflow", "id", GPM));
+
+                // Touch feedback
+                @SuppressLint("InlinedApi") TypedArray a = header.getContext().obtainStyledAttributes(new int[]{Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                        ? android.R.attr.selectableItemBackgroundBorderless : android.R.attr.selectableItemBackground});
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    queueSwitcher.setBackground(a.getDrawable(0));
+                    overflow.setBackground(a.getDrawable(0));
+                } else {
+                    //noinspection deprecation
+                    queueSwitcher.setBackgroundDrawable(a.getDrawable(0));
+                    //noinspection deprecation
+                    overflow.setBackgroundDrawable(a.getDrawable(0));
+                }
+
                 // Add EQ button
                 if (PREFS.getBoolean(Common.NP_ADD_EQ_SHORTCUT, false)) {
-                    RelativeLayout header = (RelativeLayout) lIParam.view.findViewById(lIParam.res.getIdentifier("top_wrapper_right", "id", GPM));
-                    header.addView(getEQButton(header, resParam.res), header.getChildCount() - 1);
-                    RelativeLayout.LayoutParams overflow = new RelativeLayout.LayoutParams(
-                            exLIPar.res.getDimensionPixelSize(lIParam.res.getIdentifier("nowplaying_screen_info_block_width", "dimen", GPM)),
-                            exLIPar.res.getDimensionPixelSize(lIParam.res.getIdentifier("nowplaying_screen_info_block_height", "dimen", GPM)));
-                    overflow.addRule(RelativeLayout.RIGHT_OF, lIParam.res.getIdentifier("plain", "id", GPM));
-                    header.findViewById(lIParam.res.getIdentifier("overflow", "id", GPM)).setLayoutParams(overflow);
+                    header.addView(getEQButton(header, resParam.res), 0);
+                    RelativeLayout.LayoutParams queueParams = (RelativeLayout.LayoutParams) queueSwitcher.getLayoutParams();
+                    queueParams.addRule(RelativeLayout.RIGHT_OF, 0);
+                    queueParams.addRule(RelativeLayout.RIGHT_OF, lIParam.res.getIdentifier("plain", "id", GPM));
+                    queueParams.setMargins(0, 0, 0, 0);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        queueParams.setMarginStart(0);
+                        eQButton.setBackground(a.getDrawable(0));
+                    } else {
+                        //noinspection deprecation
+                        eQButton.setBackgroundDrawable(a.getDrawable(0));
+                    }
+                    eQButton.setVisibility(queueSwitcher.getVisibility());
                 }
+                a.recycle();
+
                 // Resize covers
                 if (PREFS.getBoolean(Common.NP_RESIZE_COVERS, false)) {
                     View pager = lIParam.view.findViewById(lIParam.res.getIdentifier("art_pager", "id", GPM));
@@ -88,20 +116,24 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                     pagerLayoutParams.addRule(RelativeLayout.ABOVE, lIParam.res.getIdentifier("play_controls", "id", GPM));
                     pager.setLayoutParams(pagerLayoutParams);
                 }
-                // Improve visibility
+                // Improve playback controls visibility
                 if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
-                    ShapeDrawable shape = new ShapeDrawable(new OvalShape());
-                    shape.getPaint().setColor(Color.parseColor("#AA000000"));
+                    XModuleResources modRes = createInstance(MODULE_PATH, resParam.res);
                     ImageView repeat = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("repeat", "id", GPM)),
                             shuffle = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("shuffle", "id", GPM));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        repeat.setBackground(shape);
-                        shuffle.setBackground(shape);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        repeat.setBackground(modRes.getDrawable(R.drawable.ripple_circle, null));
+                        shuffle.setBackground(modRes.getDrawable(R.drawable.ripple_circle, null));
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        //noinspection deprecation
+                        repeat.setBackground(modRes.getDrawable(R.drawable.circle));
+                        //noinspection deprecation
+                        shuffle.setBackground(modRes.getDrawable(R.drawable.circle));
                     } else {
                         //noinspection deprecation
-                        repeat.setBackgroundDrawable(shape);
+                        repeat.setBackgroundDrawable(modRes.getDrawable(R.drawable.circle));
                         //noinspection deprecation
-                        shuffle.setBackgroundDrawable(shape);
+                        shuffle.setBackgroundDrawable(modRes.getDrawable(R.drawable.circle));
                     }
                 }
                 // Tint graphics
@@ -118,13 +150,15 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 exLIPar.res.getDimensionPixelSize(exLIPar.res.getIdentifier("nowplaying_screen_info_block_width", "dimen", GPM)),
                 exLIPar.res.getDimensionPixelSize(exLIPar.res.getIdentifier("nowplaying_screen_info_block_height", "dimen", GPM)));
-        params.addRule(RelativeLayout.RIGHT_OF, exLIPar.res.getIdentifier("play_pause_header", "id", GPM));
+        params.setMargins((int) header.getContext().getResources().getDisplayMetrics().density * 16, 0, 0, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            params.setMarginStart((int) header.getContext().getResources().getDisplayMetrics().density * 16);
+        }
         eQButton.setLayoutParams(params);
-        XModuleResources modRes = XModuleResources.createInstance(MODULE_PATH, res);
+        XModuleResources modRes = createInstance(MODULE_PATH, res);
         //noinspection deprecation
         eQButton.setImageDrawable(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? modRes.getDrawable(R.drawable.ic_equalizer_black_24dp, null) : modRes.getDrawable(R.drawable.ic_equalizer_black_24dp));
         eQButton.setScaleType(ImageView.ScaleType.CENTER);
-        eQButton.setBackgroundResource(0);
         eQButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -140,10 +174,10 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                 } catch (Exception e) {
                     e.printStackTrace();
                     Toast.makeText(view.getContext(), "Couldn't find an Equalizer app. Try to install DSP Manager or similar", Toast.LENGTH_SHORT).show();
+                    view.setVisibility(View.GONE);
                 }
             }
         });
-        eQButton.setVisibility(View.GONE);
         return eQButton;
     }
 
@@ -160,7 +194,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
                     ImageView mAlbum = (ImageView) XposedHelpers.getObjectField(param.thisObject, "mAlbum");
                     BitmapDrawable cover = (BitmapDrawable) mAlbum.getDrawable();
                     if (cover != null) {
-                        Palette.generateAsync(cover.getBitmap(), 16, NowPlaying.this);
+                        Palette.from(cover.getBitmap()).maximumColorCount(16).generate(NowPlaying.this);
                     }
                 }
             }
