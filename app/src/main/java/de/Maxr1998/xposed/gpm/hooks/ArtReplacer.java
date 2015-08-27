@@ -17,6 +17,13 @@ public class ArtReplacer {
 
     public static void init(XC_LoadPackage.LoadPackageParam lPParam) {
         try {
+            File overlayDirectory = new File(ART_CACHE_OVERLAY_PATH);
+            if (!overlayDirectory.exists() && overlayDirectory.mkdirs()) {
+                log("Created ArtCacheOverlay directory");
+            }
+            if (new File(overlayDirectory, ".nomedia").createNewFile()) {
+                log("Created .nomedia");
+            }
             findAndHookMethod(GPM + ".download.cache.CacheUtils", lPParam.classLoader, "resolveArtPath", Context.class, String.class, int.class, UUID.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
