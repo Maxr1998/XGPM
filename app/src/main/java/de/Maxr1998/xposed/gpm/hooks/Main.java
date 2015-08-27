@@ -31,6 +31,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage {
         }
         MainStage.init(lPParam);
         NavigationDrawer.init(lPParam);
+        ArtReplacer.init(lPParam);
         TrackList.init(lPParam);
 
         if (BuildConfig.DEBUG) {

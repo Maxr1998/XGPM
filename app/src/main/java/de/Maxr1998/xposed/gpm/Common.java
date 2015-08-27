@@ -1,5 +1,7 @@
 package de.Maxr1998.xposed.gpm;
 
+import android.os.Environment;
+
 public class Common {
     public static final String XGPM = "de.Maxr1998.xposed.gpm";
     public static final String GPM = "com.google.android.music";
@@ -17,4 +19,6 @@ public class Common {
     public static final String NP_TINT_ICONS = "np_tint_icons";
     //
     public static String MODULE_PATH = null;
+
+    public static final String ART_CACHE_OVERLAY_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ArtCacheOverlay/";
 }
