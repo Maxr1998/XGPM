@@ -1,11 +1,13 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
@@ -39,13 +41,12 @@ public class NavigationDrawer implements IXposedHookLoadPackage {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 PREFS.reload();
-                Object[] result = (Object[]) param.getResult();
-                ArrayList<?> screens = new ArrayList<>(Arrays.asList(result));
-                Object[] allScreens = (Object[]) getStaticObjectField(findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader), "SIDELOADED_OR_LOCKER_SCREENS");
+                ArrayList<?> screens = new ArrayList<>(Arrays.asList((Object[]) param.getResult()));
                 for (int i = 0; i < screens.size(); i++) {
-                    Object o = screens.get(i);
-                    if ((o == allScreens[3] && PREFS.getBoolean(Common.DRAWER_HIDE_HELP, false)) ||
-                            (o == allScreens[4] && PREFS.getBoolean(Common.DRAWER_HIDE_FEEDBACK, false))) {
+                    String tag = ((String) XposedHelpers.callMethod(screens.get(i), "getTag")).toLowerCase();
+                    if ((tag.equals("shop") && PREFS.getBoolean(Common.DRAWER_HIDE_SHOP, false)) ||
+                            (tag.equals("help") && PREFS.getBoolean(Common.DRAWER_HIDE_HELP, false)) ||
+                            (tag.equals("feedback") && PREFS.getBoolean(Common.DRAWER_HIDE_FEEDBACK, false))) {
                         screens.remove(i);
                         i--;
                     }

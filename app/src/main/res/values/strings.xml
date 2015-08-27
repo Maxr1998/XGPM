@@ -8,6 +8,7 @@
     <string name="album_grid_three_columns">Show three columns in album grids</string>
 
     <string name="category_drawer">Navigation drawer</string>
+    <string name="drawer_hide_shop">Hide \"Shop\" item</string>
     <string name="drawer_hide_help">Hide \"Help\" item</string>
     <string name="drawer_hide_feedback">Hide \"Send feedback\" item</string>
     <string name="drawer_hide_unlimited">Hide subscription shortcut</string>
