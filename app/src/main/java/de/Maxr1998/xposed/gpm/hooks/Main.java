@@ -26,21 +26,27 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage {
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
-        if (!lPParam.packageName.equals(GPM)) {
-            return;
-        }
-        MainStage.init(lPParam);
-        NavigationDrawer.init(lPParam);
-        ArtReplacer.init(lPParam);
-        TrackList.init(lPParam);
+        if (lPParam.packageName.equals(GPM)) {
+            // UI
+            MainStage.init(lPParam);
+            NavigationDrawer.init(lPParam);
+            TrackList.init(lPParam);
 
-        if (BuildConfig.DEBUG) {
-            findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), new XC_MethodReplacement() {
-                @Override
-                protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                    return true;
-                }
-            });
+            // External
+            NotificationMod.init(lPParam);
+            ArtReplacer.init(lPParam);
+
+            // Debug
+            if (BuildConfig.DEBUG) {
+                findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), new XC_MethodReplacement() {
+                    @Override
+                    protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                        return true;
+                    }
+                });
+            }
+        } else if (lPParam.packageName.equals("com.android.systemui")) {
+            NotificationMod.initUI(lPParam);
         }
     }
 }
