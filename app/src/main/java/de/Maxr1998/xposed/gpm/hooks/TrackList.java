@@ -7,13 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
 import static de.robv.android.xposed.XposedBridge.log;
+import static de.robv.android.xposed.XposedHelpers.callMethod;
+import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
+import static de.robv.android.xposed.XposedHelpers.getLongField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
 public class TrackList {
@@ -21,28 +23,32 @@ public class TrackList {
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
             // Artist shortcut
-            findAndHookMethod(GPM + ".ui.mylibrary.MaterialTrackContainerFragment", lPParam.classLoader, "onCreateView",
+            findAndHookMethod(GPM + ".ui.mylibrary.TrackContainerFragment", lPParam.classLoader, "onCreateView",
                     LayoutInflater.class, ViewGroup.class, Bundle.class, new XC_MethodHook() {
                         @Override
                         protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+                            final Context context = (Context) callMethod(param.thisObject, "getActivity");
+                            final Object headerView = getObjectField(param.thisObject, "mMaterialHeader");
                             View.OnClickListener openArtistPage = new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    Object meta = getObjectField(param.thisObject, "mDetailsMetadata");
-                                    Class[] args = {Context.class, Long.class, String.class, Boolean.class};
-                                    XposedHelpers.callStaticMethod(findClass(GPM + ".ui.mylibrary.ArtistPageActivity", lPParam.classLoader),
-                                            "showArtist", args, XposedHelpers.callMethod(param.thisObject, "getActivity"),
-                                            getObjectField(meta, "artistId"), getObjectField(meta, "secondaryTitle"), true);
+                                    final Object meta = getObjectField(param.thisObject, "mDetailsMetadata");
+                                    final Object songList = getObjectField(headerView, "mSongList");
+                                    final boolean isNautilus = findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(songList);
+                                    final Class artistPageActivity = findClass(GPM + ".ui.mylibrary.ArtistPageActivity", lPParam.classLoader);
+                                    final long artistId = getLongField(meta, "artistId");
+                                    final String secondaryTitle = (String) getObjectField(meta, "secondaryTitle");
+                                    if (isNautilus) {
+                                        callStaticMethod(artistPageActivity, "showNautilusArtist", new Class[]{String.class, String.class},
+                                                context, getObjectField(meta, "metajamArtistId"), secondaryTitle);
+                                    } else if (artistId != -1) {
+                                        callStaticMethod(artistPageActivity, "showArtist", new Class[]{Context.class, Long.class, String.class, Boolean.class},
+                                                context, artistId, secondaryTitle, true);
+                                    }
                                 }
                             };
-                            Object header = getObjectField(param.thisObject, "mMaterialHeader");
-                            Object songList = getObjectField(header, "mSongList");
-
-                            if (findClass(GPM + ".medialist.PlaylistSongList", lPParam.classLoader).isInstance(songList) || findClass(GPM + ".medialist.SharedWithMeSongList", lPParam.classLoader).isInstance(songList)) {
-                                return;
-                            }
-                            View artistImage = (View) getObjectField(header, "mAvatar");
-                            View extraInfo = (View) getObjectField(header, "mSubtitle");
+                            View artistImage = (View) getObjectField(headerView, "mAvatar");
+                            View extraInfo = (View) getObjectField(headerView, "mSubtitle");
                             artistImage.setOnClickListener(openArtistPage);
                             extraInfo.setOnClickListener(openArtistPage);
                         }
