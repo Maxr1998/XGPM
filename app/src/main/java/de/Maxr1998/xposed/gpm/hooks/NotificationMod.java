@@ -8,13 +8,17 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.text.SpannableString;
+import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -66,7 +70,7 @@ public class NotificationMod {
                             new Class[]{Context.class, String[].class, String.class}, context, new String[]{"title", "VThumbnailUrl"}, "");
 
                     int activeTitle = 2, start = position - 2;
-                    if (position < 3) {
+                    if (position < 3 || cursor.getCount() < 8) {
                         activeTitle = position;
                         start = 0;
                     } else if (cursor.getCount() - position < 6) {
@@ -151,7 +155,7 @@ public class NotificationMod {
                                     Animation collapse = new Animation() {
                                         @Override
                                         protected void applyTransformation(float interpolatedTime, Transformation t) {
-                                            rootParams.height = (int) (density * 128 + (1f - interpolatedTime) * density * 128);
+                                            rootParams.height = (int) (density * 128 * (2f - interpolatedTime));
                                             root.requestLayout();
                                         }
 
@@ -174,7 +178,7 @@ public class NotificationMod {
                                     Animation expand = new Animation() {
                                         @Override
                                         protected void applyTransformation(float interpolatedTime, Transformation t) {
-                                            rootParams.height = (int) (density * 128 + interpolatedTime * density * 128);
+                                            rootParams.height = (int) (density * 128 * (1f + interpolatedTime));
                                             root.requestLayout();
                                         }
 
@@ -202,7 +206,7 @@ public class NotificationMod {
                             queueButton.setImageDrawable(res.getDrawable(res.getIdentifier("ic_queue_dark", "drawable", GPM), null));
                             queueButton.setColorFilter(Color.WHITE);
                             queueButton.setBackground(null);
-                            RelativeLayout.LayoutParams buttonParams = new RelativeLayout.LayoutParams((int) density * 48, (int) density * 48);
+                            RelativeLayout.LayoutParams buttonParams = new RelativeLayout.LayoutParams((int) (density * 48), (int) (density * 48));
                             buttonParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, TRUE);
                             buttonParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, TRUE);
                             buttonParams.addRule(RelativeLayout.ALIGN_PARENT_END, TRUE);
@@ -216,14 +220,16 @@ public class NotificationMod {
                             queueLayout.setClickable(true);
                             queueLayout.setVisibility(View.GONE);
                             // Music items
-                            TypedArray a = root.getContext().obtainStyledAttributes(new int[]{android.R.attr.selectableItemBackgroundBorderless});
                             for (int i = 0; i < 8; i++) {
-                                // Title container
+                                // Title containerb
                                 LinearLayout titleLayout = new LinearLayout(root.getContext());
                                 titleLayout.setId(TITLE_LAYOUT_BASE_ID + i);
                                 titleLayout.setOrientation(LinearLayout.HORIZONTAL);
-                                titleLayout.setBackground(a.getDrawable(0));
-                                LinearLayout.LayoutParams textContainerParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) density * 32);
+                                ShapeDrawable mask = new ShapeDrawable(new RectShape());
+                                mask.getPaint().setColor(Color.WHITE);
+                                //noinspection deprecation
+                                titleLayout.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.parseColor("#1f000000")), null, mask));
+                                LinearLayout.LayoutParams textContainerParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (density * 32));
                                 titleLayout.setLayoutParams(textContainerParams);
                                 titleLayout.setClickable(true);
                                 titleLayout.setOnClickListener(closeAndMaybeSwitch);
@@ -231,16 +237,19 @@ public class NotificationMod {
                                 ImageView albumArt = new ImageView(root.getContext());
                                 albumArt.setId(IMAGE_BASE_ID + i);
                                 albumArt.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                                LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams((int) density * 32, (int) density * 32);
+                                LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams((int) (density * 32), (int) (density * 32));
                                 albumArt.setLayoutParams(imageParams);
                                 // Title text
                                 TextView titleText = new TextView(root.getContext());
                                 titleText.setId(TEXT_BASE_ID + i);
                                 titleText.setTextColor(Color.BLACK);
                                 titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+                                titleText.setSingleLine();
+                                titleText.setMaxLines(1);
+                                titleText.setEllipsize(TextUtils.TruncateAt.END);
                                 titleText.setGravity(Gravity.CENTER_VERTICAL);
-                                titleText.setPadding((int) density * 12, 0, (int) density * 16, 0);
-                                LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) density * 32);
+                                titleText.setPadding((int) (density * 12), 0, (int) (density * 16), 0);
+                                LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (density * 32));
                                 titleText.setLayoutParams(textParams);
                                 // Click view
                                 View clickView = new View(root.getContext());
@@ -253,7 +262,6 @@ public class NotificationMod {
                                 titleLayout.addView(clickView);
                                 queueLayout.addView(titleLayout);
                             }
-                            a.recycle();
                             root.addView(queueButton, root.getChildCount() - 1);
                             root.addView(queueLayout, root.getChildCount() - 2);
                         }
