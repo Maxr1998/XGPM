@@ -29,6 +29,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
@@ -48,8 +50,7 @@ public class NotificationMod {
     public static final int IMAGE_BASE_ID = TEXT_BASE_ID + 10;
     public static final int CLICK_BASE_ID = IMAGE_BASE_ID + 10;
     public static final String INTENT_ACTION = "com.android.music.musicservicecommand.queue";
-    public static final String POSITION_INTENT_EXTRA = "queue_position";
-
+    public static final String SEEK_COUNT_INTENT_EXTRA = "queue_position";
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
@@ -82,8 +83,8 @@ public class NotificationMod {
                         mNotification.bigContentView.setTextViewText(TEXT_BASE_ID + i, titles[i] != null ? i == activeTitle ? getBoldString(titles[i]) : titles[i] : "");
                         mNotification.bigContentView.setImageViewResource(IMAGE_BASE_ID + i, titles[i] != null ? context.getResources().getIdentifier("bg_default_album_art", "drawable", GPM) : android.R.color.transparent);
                         Intent queue = new Intent(INTENT_ACTION).setClass(context, context.getClass());
-                        queue.putExtra(POSITION_INTENT_EXTRA, titles[i] != null ? i : -1);
-                        mNotification.bigContentView.setOnClickPendingIntent(CLICK_BASE_ID + i, PendingIntent.getService(context, 0, queue, 0));
+                        queue.putExtra(SEEK_COUNT_INTENT_EXTRA, titles[i] != null ? i - activeTitle : 0xff);
+                        mNotification.bigContentView.setOnClickPendingIntent(CLICK_BASE_ID + i, PendingIntent.getService(context, (int) System.currentTimeMillis() + i, queue, PendingIntent.FLAG_UPDATE_CURRENT));
                     }
                 }
             });
@@ -91,11 +92,13 @@ public class NotificationMod {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     Intent intent = (Intent) param.args[0];
-                    if (intent != null && intent.getAction() != null && intent.getAction().equals(INTENT_ACTION) && intent.hasExtra(POSITION_INTENT_EXTRA)) {
-                        int clickPosition = intent.getIntExtra(POSITION_INTENT_EXTRA, 0);
-                        if (clickPosition != -1) {
-                            log("Clicked " + clickPosition);
+                    if (intent != null && intent.getAction() != null && intent.getAction().equals(INTENT_ACTION) && intent.hasExtra(SEEK_COUNT_INTENT_EXTRA)) {
+                        int count = intent.getIntExtra(SEEK_COUNT_INTENT_EXTRA, 0);
+                        if (count != 0xff) {
                             Object devicePlayback = getObjectField(param.thisObject, "mDevicePlayback");
+                            AtomicInteger seekCount = (AtomicInteger) getObjectField(devicePlayback, "mPendingMediaButtonSeekCount");
+                            seekCount.addAndGet(count);
+                            callMethod(devicePlayback, "handleMediaButtonSeek", new Class[]{boolean.class}, true);
                         }
                         param.setResult(Service.START_STICKY);
                     }
@@ -131,7 +134,6 @@ public class NotificationMod {
                                 public void onClick(View v) {
                                     // Switch title if a text item was clicked
                                     if (v instanceof LinearLayout) {
-                                        log(v.getId() + (CLICK_BASE_ID - TITLE_LAYOUT_BASE_ID) + "");
                                         root.findViewById(v.getId() + (CLICK_BASE_ID - TITLE_LAYOUT_BASE_ID)).performClick();
                                     }
                                     // Close
@@ -141,8 +143,8 @@ public class NotificationMod {
                                         public void onAnimationEnd(Animator animation) {
                                             super.onAnimationEnd(animation);
                                             queueLayout.setVisibility(View.GONE);
-                                            queueButton.setColorFilter(Color.WHITE);
                                             queueButton.setImageDrawable(res.getDrawable(res.getIdentifier("ic_queue_dark", "drawable", GPM), null));
+                                            queueButton.setColorFilter(Color.WHITE);
                                         }
                                     });
                                     anim.start();
@@ -189,8 +191,8 @@ public class NotificationMod {
                                         @Override
                                         public void onAnimationEnd(Animator animation) {
                                             super.onAnimationEnd(animation);
-                                            queueButton.clearColorFilter();
                                             queueButton.setImageDrawable(res.getDrawable(res.getIdentifier("btn_close_medium", "drawable", GPM), null));
+                                            queueButton.setColorFilter(Color.BLACK);
                                         }
                                     });
                                     reveal.start();
