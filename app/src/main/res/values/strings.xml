@@ -6,6 +6,10 @@
     <string name="category_main">Main</string>
     <string name="default_my_library">Show \"My Library\" as default screen</string>
     <string name="album_grid_three_columns">Show three columns in album grids</string>
+    <string name="universal_art_replacer">Enable universal art replacer</string>
+    <string name="universal_art_replacer_summary">Adds ability to replace any Artist- or Album-Art in Google Play Music.
+        You need to place an image file with exactly the same file name &amp; dimensions as in
+        <i>/data/data/com.google.android.music/files/artwork/</i> in the <i>ArtCacheOverlay</i> folder on your sdcard.</string>
 
     <string name="category_drawer">Navigation drawer</string>
     <string name="drawer_hide_shop">Hide \"Shop\" item</string>
