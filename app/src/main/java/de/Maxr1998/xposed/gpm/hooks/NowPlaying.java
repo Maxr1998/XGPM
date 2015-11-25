@@ -95,8 +95,10 @@ public class NowPlaying {
     }
 
     public static void initResources(final XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
+        final XModuleResources modRes = createInstance(MODULE_PATH, resParam.res);
+
         // Replace overflow button
-        resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
+        resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", modRes.fwd(R.drawable.ic_more_vert_black_24dp));
 
         // Remove drop shadow from album art
         if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
@@ -106,7 +108,7 @@ public class NowPlaying {
                     return new ColorDrawable(0);
                 }
             });
-            resParam.res.setReplacement(GPM, "dimen", "rating_controls_now_playing_page", createInstance(MODULE_PATH, resParam.res).fwd(R.dimen.controls_height));
+            resParam.res.setReplacement(GPM, "dimen", "rating_controls_now_playing_page", modRes.fwd(R.dimen.controls_height));
         }
 
         resParam.res.hookLayout(GPM, "layout", "nowplaying_screen", new XC_LayoutInflated() {
@@ -160,22 +162,23 @@ public class NowPlaying {
                 }
                 // Improve playback controls visibility
                 if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
-                    XModuleResources modRes = createInstance(MODULE_PATH, resParam.res);
                     ImageView repeat = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("repeat", "id", GPM)),
                             shuffle = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("shuffle", "id", GPM));
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        repeat.setBackground(modRes.getDrawable(R.drawable.ripple_circle, null));
-                        shuffle.setBackground(modRes.getDrawable(R.drawable.ripple_circle, null));
-                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        //noinspection deprecation
-                        repeat.setBackground(modRes.getDrawable(R.drawable.circle));
-                        //noinspection deprecation
-                        shuffle.setBackground(modRes.getDrawable(R.drawable.circle));
-                    } else {
-                        //noinspection deprecation
-                        repeat.setBackgroundDrawable(modRes.getDrawable(R.drawable.circle));
-                        //noinspection deprecation
-                        shuffle.setBackgroundDrawable(modRes.getDrawable(R.drawable.circle));
+                    if (((View) repeat.getParent()).getId() != lIParam.res.getIdentifier("play_controls", "id", GPM)) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            repeat.setBackground(modRes.getDrawable(R.drawable.ripple_circle, null));
+                            shuffle.setBackground(modRes.getDrawable(R.drawable.ripple_circle, null));
+                        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            //noinspection deprecation
+                            repeat.setBackground(modRes.getDrawable(R.drawable.circle));
+                            //noinspection deprecation
+                            shuffle.setBackground(modRes.getDrawable(R.drawable.circle));
+                        } else {
+                            //noinspection deprecation
+                            repeat.setBackgroundDrawable(modRes.getDrawable(R.drawable.circle));
+                            //noinspection deprecation
+                            shuffle.setBackgroundDrawable(modRes.getDrawable(R.drawable.circle));
+                        }
                     }
                 }
                 // Tint graphics
