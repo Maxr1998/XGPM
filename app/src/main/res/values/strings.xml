@@ -21,4 +21,7 @@
     <string name="np_remove_drop_shadow">Remove drop shadow over cover</string>
     <string name="np_tint_icons">Tint icons with color extracted from cover</string>
     <string name="np_tint_icons_summary">NOTE: Sometimes color isn\'t updated anymore, just minimize and reopen GPM</string>
+
+    <string name="category_xgpm">XGPM</string>
+    <string name="hide_from_launcher">Hide XGPM from launcher</string>
 </resources>

@@ -18,5 +18,7 @@ public class Common {
     public static final String NP_REMOVE_DROP_SHADOW = "np_remove_drop_shadow";
     public static final String NP_TINT_ICONS = "np_tint_icons";
     //
+    public static final String HIDE_APP_FROM_LAUNCHER = "hide_from_launcher";
+    //
     public static final String ART_CACHE_OVERLAY_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ArtCacheOverlay/";
 }

@@ -41,4 +41,9 @@
             android:summary="@string/np_tint_icons_summary"
             android:title="@string/np_tint_icons" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/category_xgpm">
+        <SwitchPreference
+            android:key="hide_from_launcher"
+            android:title="@string/hide_from_launcher" />
+    </PreferenceCategory>
 </PreferenceScreen>
