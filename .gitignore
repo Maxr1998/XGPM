@@ -1,10 +1,30 @@
-.gradle
-/.idea
-/app/build
-/build
-/gradle*
-/local.properties
+# Generated files
+build/
+app/build
 
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Eclipse project files
+.classpath
+.project
+project.properties
+lint.xml
+
+# Intellij project files
 *.iml
-.DS_Store
-/captures
+*.ipr
+*.iws
+.idea/
+
+# Gradle
+gradle/
+.gradle/
+gradlew*
+
+# Gedit save files
+*.*~
+
+# KeyStore + Passwords
+app/sMaxr1998_key.jks
+app/keyStore.properties

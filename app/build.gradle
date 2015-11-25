@@ -1,34 +1,27 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        main
+    }
     compileSdkVersion 23
-    buildToolsVersion "23.0.0"
-
+    buildToolsVersion "23.0.2"
     defaultConfig {
         applicationId "de.Maxr1998.xposed.gpm"
         minSdkVersion 15
         targetSdkVersion 23
         versionCode 11
         versionName "1.5.1"
-    }
-    signingConfigs {
-        main {
-            storeFile file("../../../app_maxlock_key")
-            keyAlias 'MaxLock'
-            storePassword System.getenv("KSTOREPWD")
-            keyPassword System.getenv("KEYPWD")
-        }
+        signingConfig signingConfigs.main
     }
     buildTypes {
         release {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-conf.txt'
             minifyEnabled true
             shrinkResources false
-            signingConfig signingConfigs.main
             debuggable false
         }
         debug {
-            signingConfig signingConfigs.main
             debuggable true
         }
     }
@@ -40,13 +33,24 @@ android {
         abortOnError false
     }
 }
+
+def propFile = project.file("keyStore.properties")
+if (propFile.exists()) {
+    def props = new Properties()
+    props.load(new FileInputStream(propFile))
+    android.signingConfigs.main.storeFile project.file(props.keyStore)
+    android.signingConfigs.main.storePassword props.keyStorePassword
+    android.signingConfigs.main.keyAlias props.keyAlias
+    android.signingConfigs.main.keyPassword props.keyPassword
+}
+
 repositories {
     flatDir {
         dirs 'libs'
     }
 }
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'com.android.support:palette-v7:23.0.1'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:palette-v7:23.1.1'
     provided files('lib/XposedBridgeApi-20150213.jar')
 }
