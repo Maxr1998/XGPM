@@ -39,7 +39,7 @@ public class TrackList {
                                     final long artistId = getLongField(meta, "artistId");
                                     final String secondaryTitle = (String) getObjectField(meta, "secondaryTitle");
                                     if (isNautilus) {
-                                        callStaticMethod(artistPageActivity, "showNautilusArtist", new Class[]{String.class, String.class},
+                                        callStaticMethod(artistPageActivity, "showNautilusArtist", new Class[]{Context.class, String.class, String.class},
                                                 context, getObjectField(meta, "metajamArtistId"), secondaryTitle);
                                     } else if (artistId != -1) {
                                         callStaticMethod(artistPageActivity, "showArtist", new Class[]{Context.class, Long.class, String.class, Boolean.class},
