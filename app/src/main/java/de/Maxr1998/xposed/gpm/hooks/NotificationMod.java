@@ -66,7 +66,7 @@ public class NotificationMod {
                     Notification mNotification = (Notification) param.getResult();
                     Object playback = getObjectField(param.thisObject, "mDevicePlayback");
                     int position = getIntField(playback, "mPlayPos");
-                    Cursor cursor = (Cursor) callMethod(getObjectField(playback, "mMediaList"), "createSyncCursor",
+                    Cursor cursor = (Cursor) callMethod(callMethod(getObjectField(playback, "mPlayList"), "getWrappedSongList"), "createSyncCursor",
                             new Class[]{Context.class, String[].class, String.class}, context, new String[]{"title", "VThumbnailUrl"}, "");
 
                     int activeTitle = 2, start = position - 2;
@@ -102,7 +102,7 @@ public class NotificationMod {
                             Object devicePlayback = getObjectField(param.thisObject, "mDevicePlayback");
                             AtomicInteger seekCount = (AtomicInteger) getObjectField(devicePlayback, "mPendingMediaButtonSeekCount");
                             seekCount.addAndGet(count);
-                            callMethod(devicePlayback, "handleMediaButtonSeek", new Class[]{boolean.class}, true);
+                            callMethod(devicePlayback, "handleMediaButtonSeek", new Class[]{boolean.class, int.class}, true, 4);
                         }
                         param.setResult(Service.START_STICKY);
                     }
