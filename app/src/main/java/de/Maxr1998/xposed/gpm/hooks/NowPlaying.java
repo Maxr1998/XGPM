@@ -27,8 +27,6 @@ import android.widget.Toast;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.Maxr1998.xposed.gpm.R;
-import de.robv.android.xposed.IXposedHookInitPackageResources;
-import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources;
@@ -37,22 +35,66 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static android.content.res.XModuleResources.createInstance;
 import static de.Maxr1998.xposed.gpm.Common.GPM;
-import static de.Maxr1998.xposed.gpm.Common.MODULE_PATH;
+import static de.Maxr1998.xposed.gpm.hooks.Main.MODULE_PATH;
 import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
-public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookLoadPackage, Palette.PaletteAsyncListener {
+public class NowPlaying {
 
-    private XC_LayoutInflated.LayoutInflatedParam exLIPar;
-    private int lastColor = 0;
-    private Object nowPlayingScreenFragment;
-    private ImageButton eQButton;
+    private static XC_LayoutInflated.LayoutInflatedParam exLIPar;
+    private static int lastColor = 0;
+    private static Object nowPlayingScreenFragment;
+    private static ImageButton eQButton;
+    private static Palette.PaletteAsyncListener listener = new Palette.PaletteAsyncListener() {
+        @Override
+        public void onGenerated(Palette palette) {
+            lastColor = palette.getVibrantColor(Color.parseColor("#9E9E9E"));
+            tintGraphics();
+        }
+    };
 
-    @Override
-    public void handleInitPackageResources(final XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
-        if (!resParam.packageName.equals(GPM))
+    public static void init(final XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
+        if (!lPParam.packageName.equals(GPM))
             return;
+        // Icon tinting from cover Palette
+        findAndHookMethod(GPM + ".ui.NowPlayingArtPageFragment", lPParam.classLoader, "updateArtVisibility", new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                PREFS.reload();
+                if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
+                    ImageView mAlbum = (ImageView) XposedHelpers.getObjectField(param.thisObject, "mAlbum");
+                    BitmapDrawable cover = (BitmapDrawable) mAlbum.getDrawable();
+                    if (cover != null) {
+                        Palette.from(cover.getBitmap()).maximumColorCount(16).generate(listener);
+                    }
+                }
+            }
+        });
+        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "updateQueueSwitcherState", new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                PREFS.reload();
+                if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
+                    nowPlayingScreenFragment = param.thisObject;
+                    tintGraphics();
+                }
+            }
+        });
 
+        // Handle visibility of EQ Button
+        String exScrollView = GPM + ".widgets.ExpandingScrollView";
+        String exState = exScrollView + ".ExpandingState";
+        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onExpandingStateChanged", exScrollView, exState, exState, new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                if (eQButton != null) {
+                    eQButton.setVisibility(((View) XposedHelpers.getObjectField(param.thisObject, "mQueueSwitcher")).getVisibility());
+                }
+            }
+        });
+    }
+
+    public static void initResources(final XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
         // Replace overflow button
         resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", createInstance(MODULE_PATH, resParam.res).fwd(R.drawable.ic_more_vert_black_24dp));
 
@@ -144,7 +186,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         });
     }
 
-    private ImageButton getEQButton(RelativeLayout header, XResources res) {
+    private static ImageButton getEQButton(RelativeLayout header, XResources res) {
         eQButton = new ImageButton(header.getContext());
         eQButton.setId(exLIPar.res.getIdentifier("plain", "id", GPM));
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -181,55 +223,7 @@ public class NowPlaying implements IXposedHookInitPackageResources, IXposedHookL
         return eQButton;
     }
 
-    @Override
-    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
-        if (!lPParam.packageName.equals(GPM))
-            return;
-        // Icon tinting from cover Palette
-        findAndHookMethod(GPM + ".ui.NowPlayingArtPageFragment", lPParam.classLoader, "updateArtVisibility", new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                PREFS.reload();
-                if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
-                    ImageView mAlbum = (ImageView) XposedHelpers.getObjectField(param.thisObject, "mAlbum");
-                    BitmapDrawable cover = (BitmapDrawable) mAlbum.getDrawable();
-                    if (cover != null) {
-                        Palette.from(cover.getBitmap()).maximumColorCount(16).generate(NowPlaying.this);
-                    }
-                }
-            }
-        });
-        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "updateQueueSwitcherState", new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                PREFS.reload();
-                if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
-                    nowPlayingScreenFragment = param.thisObject;
-                    tintGraphics();
-                }
-            }
-        });
-
-        // Handle visibility of EQ Button
-        String exScrollView = GPM + ".widgets.ExpandingScrollView";
-        String exState = exScrollView + ".ExpandingState";
-        findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onExpandingStateChanged", exScrollView, exState, exState, new XC_MethodHook() {
-            @Override
-            protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                if (eQButton != null) {
-                    eQButton.setVisibility(((View) XposedHelpers.getObjectField(param.thisObject, "mQueueSwitcher")).getVisibility());
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onGenerated(Palette palette) {
-        lastColor = palette.getVibrantColor(Color.parseColor("#9E9E9E"));
-        tintGraphics();
-    }
-
-    private void tintGraphics() {
+    private static void tintGraphics() {
         if (lastColor == 0) {
             return;
         }
