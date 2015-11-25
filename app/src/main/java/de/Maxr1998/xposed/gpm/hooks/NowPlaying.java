@@ -54,8 +54,6 @@ public class NowPlaying {
     };
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
-        if (!lPParam.packageName.equals(GPM))
-            return;
         // Icon tinting from cover Palette
         findAndHookMethod(GPM + ".ui.NowPlayingArtPageFragment", lPParam.classLoader, "updateArtVisibility", new XC_MethodHook() {
             @Override
