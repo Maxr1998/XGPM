@@ -29,6 +29,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
         if (lPParam.packageName.equals(GPM)) {
+            PREFS.reload();
             // UI
             MainStage.init(lPParam);
             NavigationDrawer.init(lPParam);
