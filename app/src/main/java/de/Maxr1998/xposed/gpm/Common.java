@@ -10,9 +10,7 @@ public class Common {
     public static final String ALBUM_GRID_THREE_COLUMNS = "album_grid_three_columns";
     public static final String UNIVERSAL_ART_REPLACER = "universal_art_replacer";
     //
-    public static final String DRAWER_HIDE_SHOP = "drawer_hide_shop";
-    public static final String DRAWER_HIDE_HELP = "drawer_hide_help";
-    public static final String DRAWER_HIDE_FEEDBACK = "drawer_hide_feedback";
+    public static final String NAV_DRAWER_HIDDEN_ITEMS = "nav_drawer_hidden_items";
     public static final String DRAWER_HIDE_UNLIMITED = "drawer_hide_unlimited";
     //
     public static final String NP_ADD_EQ_SHORTCUT = "np_add_eq";

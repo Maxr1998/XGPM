@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="nav_drawer_items">
+        <item>top_charts</item>
+        <item>new_releases</item>
+        <item>nocontent</item>
+        <item>radio</item>
+        <item>downloaded_only</item>
+        <item>shop</item>
+        <item>send_gift</item>
+        <item>help</item>
+    </string-array>
+</resources>

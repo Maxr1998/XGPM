@@ -2,6 +2,8 @@ package de.Maxr1998.xposed.gpm.hooks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
@@ -13,43 +15,81 @@ import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
+import static de.robv.android.xposed.XposedHelpers.setIntField;
 
 public class NavigationDrawer {
 
+    @SuppressWarnings("unchecked")
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
-            // Remove "Get Unlimited Music"
-            findAndHookMethod("com.google.android.play.drawer.PlayDrawerLayout", lPParam.classLoader, "updateDockedAction",
-                    "com.google.android.play.drawer.PlayDrawerLayout.PlayDrawerDockedAction", new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            PREFS.reload();
-                            if (PREFS.getBoolean(Common.DRAWER_HIDE_UNLIMITED, false)) {
-                                param.args[0] = null;
-                            }
-                        }
-                    });
+            // Constant classes
+            final Class screenClass = findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader);
+            final Class homeMenuScreensClass = findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader);
 
+            // Make playlist item show playlist fragment
+            findAndHookMethod(screenClass, "addCommonFragments", Map.class, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    Map<Object, Class<?>> map = (Map<Object, Class<?>>) param.args[0];
+                    Object playlistsItem = Enum.valueOf(screenClass, "NO_CONTENT");
+                    setIntField(playlistsItem, "mTitleResId", 2131428181);
+                    setIntField(playlistsItem, "mIconResourceId", 0x7f020133);
+                    setIntField(playlistsItem, "mSelectedIconResourceId", 0x7f020135);
+                    map.put(playlistsItem, findClass(GPM + ".ui.mylibrary.PlaylistRecyclerFragment", lPParam.classLoader));
+                }
+            });
 
-            // Remove "Shop", "Help" and "Feedback" items
-            findAndHookMethod(GPM + ".ui.HomeMenuScreens", lPParam.classLoader, "getMenuScreens", new XC_MethodHook() {
+            // Make playlist item a primary item
+            findAndHookMethod(screenClass, "isPrimary", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    if (param.thisObject == Enum.valueOf(screenClass, "NO_CONTENT")) {
+                        param.setResult(true);
+                    }
+                }
+            });
+
+            // Remove disabled drawer items
+            findAndHookMethod(homeMenuScreensClass, "getMenuScreens", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     PREFS.reload();
-                    ArrayList<?> screens = new ArrayList<>(Arrays.asList((Object[]) param.getResult()));
+                    ArrayList<Object> screens = new ArrayList<>(Arrays.asList((Object[]) param.getResult()));
                     for (int i = 0; i < screens.size(); i++) {
-                        String tag = ((String) XposedHelpers.callMethod(screens.get(i), "getTag")).toLowerCase();
-                        if ((tag.equals("shop") && PREFS.getBoolean(Common.DRAWER_HIDE_SHOP, false)) ||
-                                (tag.equals("help") && PREFS.getBoolean(Common.DRAWER_HIDE_HELP, false)) ||
-                                (tag.equals("feedback") && PREFS.getBoolean(Common.DRAWER_HIDE_FEEDBACK, false))) {
+                        String tag = (String) XposedHelpers.callMethod(screens.get(i), "getTag");
+                        if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.<String>emptySet()).contains(tag)) {
                             screens.remove(i);
                             i--;
+                        } else if (tag.equals("library")) {
+                            // Required to show playlist item
+                            screens.add(i + 1, Enum.valueOf(screenClass, "NO_CONTENT"));
                         }
                     }
                     screens.trimToSize();
-                    param.setResult(
-                            Arrays.copyOf(screens.toArray(), screens.size(),
-                                    (Class<? extends Object[]>) findClass(GPM + ".ui.HomeActivity.Screen[]", lPParam.classLoader)));
+                    param.setResult(Arrays.copyOf(screens.toArray(), screens.size(), (Class<? extends Object[]>) findClass(GPM + ".ui.HomeActivity.Screen[]", lPParam.classLoader)));
+                }
+            });
+
+            // Remove "Downloaded only" item
+            findAndHookMethod(homeMenuScreensClass, "getDownloadSwitchConfig", GPM + ".ui.BaseActivity", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.<String>emptySet()).contains("downloaded_only")) {
+                        param.setResult(null);
+                    }
+                }
+            });
+
+            // Remove "Get Unlimited Music"
+            final String playDrawerLayout = "com.google.android.play.drawer.PlayDrawerLayout";
+            findAndHookMethod(playDrawerLayout, lPParam.classLoader, "updateDockedAction", playDrawerLayout + ".PlayDrawerDockedAction", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getBoolean(Common.DRAWER_HIDE_UNLIMITED, false)) {
+                        param.args[0] = null;
+                    }
                 }
             });
         } catch (Throwable t) {

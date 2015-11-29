@@ -14,15 +14,11 @@
             android:title="@string/universal_art_replacer" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_drawer">
-        <SwitchPreference
-            android:key="drawer_hide_shop"
-            android:title="@string/drawer_hide_shop" />
-        <SwitchPreference
-            android:key="drawer_hide_help"
-            android:title="@string/drawer_hide_help" />
-        <SwitchPreference
-            android:key="drawer_hide_feedback"
-            android:title="@string/drawer_hide_feedback" />
+        <MultiSelectListPreference
+            android:entries="@array/nav_drawer_items_desc"
+            android:entryValues="@array/nav_drawer_items"
+            android:key="nav_drawer_hidden_items"
+            android:title="@string/nav_drawer_hide_items" />
         <SwitchPreference
             android:key="drawer_hide_unlimited"
             android:title="@string/drawer_hide_unlimited" />

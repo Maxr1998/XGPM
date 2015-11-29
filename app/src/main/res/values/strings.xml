@@ -12,9 +12,17 @@
         <i>/data/data/com.google.android.music/files/artwork/</i> in the <i>ArtCacheOverlay</i> folder on your sdcard.</string>
 
     <string name="category_drawer">Navigation drawer</string>
-    <string name="drawer_hide_shop">Hide \"Shop\" item</string>
-    <string name="drawer_hide_help">Hide \"Help\" item</string>
-    <string name="drawer_hide_feedback">Hide \"Send feedback\" item</string>
+    <string name="nav_drawer_hide_items">Hide drawer items</string>
+    <string-array name="nav_drawer_items_desc">
+        <item>Top charts</item>
+        <item>New releases</item>
+        <item>Playlists</item>
+        <item>Browse stations</item>
+        <item>Downloaded only</item>
+        <item>Shop</item>
+        <item>Send gift</item>
+        <item>Help &amp; Feedback</item>
+    </string-array>
     <string name="drawer_hide_unlimited">Hide subscription shortcut</string>
 
     <string name="category_now_playing">Now playing screen</string>
