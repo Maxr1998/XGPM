@@ -16,6 +16,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import de.Maxr1998.xposed.gpm.Common;
@@ -28,6 +30,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.layout_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         getFragmentManager().beginTransaction().replace(R.id.preference_frame, new MainFragment()).commit();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add("Open GPM")
+                .setIcon(R.drawable.ic_album_white_24dp)
+                .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
+                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        startActivity(getPackageManager().getLaunchIntentForPackage(Common.GPM));
+                        return true;
+                    }
+                });
+        return true;
     }
 
     public static class MainFragment extends PreferenceFragment {
@@ -53,13 +71,13 @@ public class MainActivity extends AppCompatActivity {
                 case Common.DEFAULT_MY_LIBRARY:
                 case Common.UNIVERSAL_ART_REPLACER:
                 case Common.NP_REMOVE_DROP_SHADOW:
-                    Snackbar.make(getView(), R.string.force_stop_required, Snackbar.LENGTH_LONG)
+                    Snackbar.make(getActivity().findViewById(R.id.preference_frame), R.string.force_stop_required, Snackbar.LENGTH_LONG)
                             .setActionTextColor(ContextCompat.getColor(getActivity(), R.color.accent))
                             .setAction(R.string.action_show_app_details, new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                    intent.setData(Uri.parse("package:com.google.android.music"));
+                                    intent.setData(Uri.parse("package:" + Common.GPM));
                                     startActivity(intent);
                                 }
                             }).show();
