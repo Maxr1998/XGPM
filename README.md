@@ -15,6 +15,8 @@ This module adds a few modifications to the Google Play Music app. It allows you
   + Open Equalizer from a new button
 * Replace any kinds of images in the app, e.g. covers and artist images
 
-[Screenshots](https://github.com/Maxr1998/XGPM/tree/master/Screenshots)  
-  
+[Screenshots](https://github.com/Maxr1998/XGPM/tree/master/Screenshots)
+
+***
+
 <img src="https://raw.githubusercontent.com/Maxr1998/XGPM/master/Screenshots/NowPlaying.png" width="360" height="640">
