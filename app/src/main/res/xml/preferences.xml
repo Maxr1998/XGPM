@@ -3,7 +3,6 @@
     <PreferenceCategory android:title="@string/category_main">
         <SwitchPreference
             android:key="default_my_library"
-            android:summary="@string/reboot_required_summary"
             android:title="@string/default_my_library" />
         <SwitchPreference
             android:key="album_grid_three_columns"
@@ -34,7 +33,6 @@
             android:title="@string/np_resize_covers" />
         <SwitchPreference
             android:key="np_remove_drop_shadow"
-            android:summary="@string/reboot_required_summary"
             android:title="@string/np_remove_drop_shadow" />
         <SwitchPreference
             android:key="np_tint_icons"

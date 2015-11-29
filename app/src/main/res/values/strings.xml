@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">XGPM</string>
 
-    <string name="reboot_required_summary">Reboot required!</string>
+    <string name="force_stop_required">Force stop of GPM required to apply</string>
+    <string name="action_show_app_details">App-Details</string>
 
     <string name="category_main">Main</string>
     <string name="default_my_library">Show \"My Library\" as default screen</string>
@@ -32,7 +33,7 @@
     <string name="np_resize_covers_summary">Make album art fully visible on screen, not hiding parts of it behind the control bars</string>
     <string name="np_remove_drop_shadow">Remove drop shadow over cover</string>
     <string name="np_tint_icons">Tint icons with color extracted from cover</string>
-    <string name="np_tint_icons_summary">NOTE: Sometimes color isn\'t updated anymore, just minimize and reopen GPM</string>
+    <string name="np_tint_icons_summary">NOTE: Sometimes color isn\'t updated anymore, just close and reopen GPM</string>
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Hide XGPM from launcher</string>

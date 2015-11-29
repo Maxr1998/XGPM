@@ -3,14 +3,20 @@ package de.Maxr1998.xposed.gpm.ui;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.TwoStatePreference;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.Maxr1998.xposed.gpm.R;
@@ -43,16 +49,33 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-            if (preference == findPreference(Common.HIDE_APP_FROM_LAUNCHER)) {
-                TwoStatePreference hideApp = (TwoStatePreference) preference;
-                if (hideApp.isChecked()) {
-                    getActivity().getPackageManager().setComponentEnabledSetting(mainComponent, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-                } else {
-                    getActivity().getPackageManager().setComponentEnabledSetting(mainComponent, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
-                }
-                return true;
+            switch (preference.getKey()) {
+                case Common.DEFAULT_MY_LIBRARY:
+                case Common.UNIVERSAL_ART_REPLACER:
+                case Common.NP_REMOVE_DROP_SHADOW:
+                    Snackbar.make(getView(), R.string.force_stop_required, Snackbar.LENGTH_LONG)
+                            .setActionTextColor(ContextCompat.getColor(getActivity(), R.color.accent))
+                            .setAction(R.string.action_show_app_details, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                    intent.setData(Uri.parse("package:com.google.android.music"));
+                                    startActivity(intent);
+                                }
+                            }).show();
+                    return false;
+                case Common.HIDE_APP_FROM_LAUNCHER:
+                    TwoStatePreference hideApp = (TwoStatePreference) preference;
+                    if (hideApp.isChecked()) {
+                        getActivity().getPackageManager().setComponentEnabledSetting(mainComponent, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                    } else {
+                        getActivity().getPackageManager().setComponentEnabledSetting(mainComponent, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
+                    }
+                    return true;
+                default:
+                    return super.onPreferenceTreeClick(preferenceScreen, preference);
+
             }
-            return super.onPreferenceTreeClick(preferenceScreen, preference);
         }
     }
 }
