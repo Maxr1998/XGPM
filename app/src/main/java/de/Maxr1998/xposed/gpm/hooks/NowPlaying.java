@@ -80,8 +80,8 @@ public class NowPlaying {
         });
 
         // Handle visibility of EQ Button
-        String exScrollView = GPM + ".widgets.ExpandingScrollView";
-        String exState = exScrollView + ".ExpandingState";
+        final String exScrollView = GPM + ".widgets.ExpandingScrollView";
+        final String exState = exScrollView + ".ExpandingState";
         findAndHookMethod(GPM + ".ui.NowPlayingScreenFragment", lPParam.classLoader, "onExpandingStateChanged", exScrollView, exState, exState, new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
