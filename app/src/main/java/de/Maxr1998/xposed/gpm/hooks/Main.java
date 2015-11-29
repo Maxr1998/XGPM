@@ -57,6 +57,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
     @Override
     public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
         if (resParam.packageName.equals(GPM)) {
+            PREFS.reload();
             NowPlaying.initResources(resParam);
         }
     }
