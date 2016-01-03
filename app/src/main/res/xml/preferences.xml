@@ -39,6 +39,12 @@
             android:summary="@string/np_tint_icons_summary"
             android:title="@string/np_tint_icons" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/category_notification">
+        <SwitchPreference
+            android:key="notification_narrow"
+            android:summary="@string/notification_narrow_summary"
+            android:title="@string/notification_narrow" />
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_xgpm">
         <SwitchPreference
             android:key="hide_from_launcher"

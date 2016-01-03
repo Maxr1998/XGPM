@@ -8,7 +8,7 @@
     <string name="default_my_library">Show \"My Library\" as default screen</string>
     <string name="album_grid_three_columns">Show three columns in album grids</string>
     <string name="universal_art_replacer">Enable universal art replacer</string>
-    <string name="universal_art_replacer_summary">Adds ability to replace any Artist- or Album-Art in Google Play Music.
+    <string name="universal_art_replacer_summary">Adds ability to replace any artist or album art in Google Play Music.
         You need to place an image file with exactly the same file name &amp; dimensions as in
         <i>/data/data/com.google.android.music/files/artwork/</i> in the <i>ArtCacheOverlay</i> folder on your sdcard.</string>
 
@@ -34,6 +34,10 @@
     <string name="np_remove_drop_shadow">Remove drop shadow over cover</string>
     <string name="np_tint_icons">Tint icons with color extracted from cover</string>
     <string name="np_tint_icons_summary">NOTE: Sometimes color isn\'t updated anymore, just close and reopen GPM</string>
+
+    <string name="category_notification">Notification</string>
+    <string name="notification_narrow">Use old notification design</string>
+    <string name="notification_narrow_summary">Remove thumbs up and down actions, show big album art</string>
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Hide XGPM from launcher</string>

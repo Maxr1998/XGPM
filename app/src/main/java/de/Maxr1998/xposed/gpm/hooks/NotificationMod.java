@@ -17,6 +17,7 @@ import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
+import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
@@ -27,6 +28,7 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,11 +37,13 @@ import android.widget.TextView;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static android.widget.RelativeLayout.TRUE;
 import static de.Maxr1998.xposed.gpm.Common.GPM;
+import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
@@ -47,6 +51,7 @@ import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getIntField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class NotificationMod {
 
     public static final int TITLE_LAYOUT_BASE_ID = 0x7f0f0200;
@@ -58,8 +63,8 @@ public class NotificationMod {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
+            // Track selection
             findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "buildLNotification", new XC_MethodHook() {
-                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Context context = (Context) param.thisObject;
@@ -108,6 +113,37 @@ public class NotificationMod {
                     }
                 }
             });
+            // Switch to old design
+            findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "addLNotificationAction", Notification.Builder.class, Notification.WearableExtender.class, int.class, int.class, int.class, PendingIntent.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getBoolean(Common.NOTIFICATION_NARROW, false)) {
+                        // Set flag
+                        Bundle extra = new Bundle(1);
+                        extra.putInt("xgpm", 1);
+                        ((Notification.Builder) param.args[0]).addExtras(extra);
+                        // Remove ThumbsUp/Down Actions
+                        Resources res = ((Context) param.thisObject).getResources();
+                        int accessibilityId = (int) param.args[4];
+                        int thumbsUpId = res.getIdentifier("accessibility_thumbsUp", "string", GPM);
+                        int thumbsDownId = res.getIdentifier("accessibility_thumbsDown", "string", GPM);
+                        if (accessibilityId == thumbsUpId || accessibilityId == thumbsDownId) {
+                            param.setResult(null);
+                        }
+                    }
+                }
+            });
+            findAndHookMethod("android.app.Notification.Builder", lPParam.classLoader, "build", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Notification.Builder builder = (Notification.Builder) param.thisObject;
+                    if (builder.getExtras().getInt("xgpm") == 1) {
+                        // Prevent force close
+                        ((Notification.MediaStyle) getObjectField(builder, "mStyle")).setShowActionsInCompactView(0, 1, 2);
+                    }
+                }
+            });
         } catch (Throwable t) {
             log(t);
         }
@@ -115,19 +151,19 @@ public class NotificationMod {
 
     public static void initUI(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                findAndHookMethod("android.widget.RemoteViews", lPParam.classLoader, "performApply", View.class, ViewGroup.class, findClass("android.widget.RemoteViews.OnClickHandler", lPParam.classLoader), new XC_MethodHook() {
-                    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-                    @Override
-                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                        View v = (View) param.args[0];
-                        final ViewGroup root;
-                        if (v instanceof ViewGroup && (root = ((ViewGroup) v)).getChildCount() == 4
-                                && root.getLayoutParams().height == root.getChildAt(0).getLayoutParams().height
-                                && root.getChildAt(0) instanceof ImageView
+            findAndHookMethod("android.widget.RemoteViews", lPParam.classLoader, "performApply", View.class, ViewGroup.class, findClass("android.widget.RemoteViews.OnClickHandler", lPParam.classLoader), new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    View v = (View) param.args[0];
+                    if (v instanceof RelativeLayout) {
+                        final RelativeLayout root = (RelativeLayout) v;
+                        if ((root.getChildCount() == 4
+                                && (root.getChildAt(0) instanceof FrameLayout || root.getChildAt(0) instanceof ImageView)
                                 && root.getChildAt(1) instanceof LinearLayout
                                 && root.getChildAt(2) instanceof LinearLayout
-                                && root.getChildAt(3) instanceof ImageView) {
+                                && root.getChildAt(3) instanceof ImageView)
+                                || root.getTag().toString().matches("bigMedia(Narrow)?")) {
+                            root.setTag("xgpmBigMedia");
                             final Resources res = root.getResources();
                             final float density = res.getDisplayMetrics().density;
                             final ViewGroup.LayoutParams rootParams = root.getLayoutParams();
@@ -212,27 +248,28 @@ public class NotificationMod {
                             buttonParams.addRule(RelativeLayout.ALIGN_PARENT_END, TRUE);
                             queueButton.setLayoutParams(buttonParams);
                             queueButton.setOnClickListener(toggle);
+                            // Prevent text overlapping queue button
+                            ViewGroup.MarginLayoutParams titleContainerParams = (ViewGroup.MarginLayoutParams) root.getChildAt(1).getLayoutParams();
+                            titleContainerParams.rightMargin = (int) (density * 48);
+                            titleContainerParams.setMarginEnd((int) (density * 48));
                             // Text container
                             queueLayout.setOrientation(LinearLayout.VERTICAL);
                             queueLayout.setBackgroundColor(Color.WHITE);
-                            RelativeLayout.LayoutParams linearLayoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                            queueLayout.setLayoutParams(linearLayoutParams);
                             queueLayout.setClickable(true);
                             queueLayout.setVisibility(View.GONE);
                             // Music items
                             for (int i = 0; i < 8; i++) {
-                                // Title containerb
-                                LinearLayout titleLayout = new LinearLayout(root.getContext());
-                                titleLayout.setId(TITLE_LAYOUT_BASE_ID + i);
-                                titleLayout.setOrientation(LinearLayout.HORIZONTAL);
+                                // Titles container
+                                LinearLayout titlesLayout = new LinearLayout(root.getContext());
+                                titlesLayout.setId(TITLE_LAYOUT_BASE_ID + i);
+                                titlesLayout.setOrientation(LinearLayout.HORIZONTAL);
                                 ShapeDrawable mask = new ShapeDrawable(new RectShape());
                                 mask.getPaint().setColor(Color.WHITE);
-                                //noinspection deprecation
-                                titleLayout.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.parseColor("#1f000000")), null, mask));
+                                titlesLayout.setBackground(new RippleDrawable(ColorStateList.valueOf(Color.parseColor("#1f000000")), null, mask));
                                 LinearLayout.LayoutParams textContainerParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) (density * 32));
-                                titleLayout.setLayoutParams(textContainerParams);
-                                titleLayout.setClickable(true);
-                                titleLayout.setOnClickListener(closeAndMaybeSwitch);
+                                titlesLayout.setLayoutParams(textContainerParams);
+                                titlesLayout.setClickable(true);
+                                titlesLayout.setOnClickListener(closeAndMaybeSwitch);
                                 // Album art
                                 ImageView albumArt = new ImageView(root.getContext());
                                 albumArt.setId(IMAGE_BASE_ID + i);
@@ -257,23 +294,24 @@ public class NotificationMod {
                                 clickView.setVisibility(View.GONE);
                                 clickView.setClickable(true);
                                 // Add views
-                                titleLayout.addView(albumArt);
-                                titleLayout.addView(titleText);
-                                titleLayout.addView(clickView);
-                                queueLayout.addView(titleLayout);
+                                titlesLayout.addView(albumArt);
+                                titlesLayout.addView(titleText);
+                                titlesLayout.addView(clickView);
+                                queueLayout.addView(titlesLayout);
                             }
-                            root.addView(queueButton, root.getChildCount() - 1);
-                            root.addView(queueLayout, root.getChildCount() - 2);
+                            root.addView(queueLayout, root.getChildCount(),
+                                    new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                            root.addView(queueButton, root.getChildCount());
                         }
                     }
-                });
-            }
+                }
+            });
         } catch (Throwable t) {
             log(t);
         }
     }
 
-    private static SpannableString getBoldString(String toBold) {
+    public static SpannableString getBoldString(String toBold) {
         SpannableString sp = new SpannableString(toBold);
         sp.setSpan(new StyleSpan(Typeface.BOLD), 0, sp.length(), 0);
         return sp;

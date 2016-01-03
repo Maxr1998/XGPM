@@ -1,5 +1,7 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.os.Build;
+
 import de.Maxr1998.xposed.gpm.BuildConfig;
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.IXposedHookInitPackageResources;
@@ -37,8 +39,10 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
             TrackList.init(lPParam);
 
             // External
-            NotificationMod.init(lPParam);
             ArtReplacer.init(lPParam);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                NotificationMod.init(lPParam);
+            }
 
             // Debug
             if (BuildConfig.DEBUG) {
@@ -49,7 +53,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
                     }
                 });
             }
-        } else if (lPParam.packageName.equals("com.android.systemui")) {
+        } else if (lPParam.packageName.equals("com.android.systemui") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             NotificationMod.initUI(lPParam);
         }
     }
