@@ -7,7 +7,9 @@ public class Common {
     public static final String GPM = "com.google.android.music";
     //
     public static final String DEFAULT_MY_LIBRARY = "default_my_library";
+    public static final String REMOVE_SITUATIONS = "remove_situations";
     public static final String ALBUM_GRID_THREE_COLUMNS = "album_grid_three_columns";
+    public static final String REMOVE_RECOMMENDATIONS = "remove_recommendations";
     public static final String UNIVERSAL_ART_REPLACER = "universal_art_replacer";
     //
     public static final String NAV_DRAWER_HIDDEN_ITEMS = "nav_drawer_hidden_items";

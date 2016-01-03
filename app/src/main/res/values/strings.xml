@@ -6,7 +6,9 @@
 
     <string name="category_main">Main</string>
     <string name="default_my_library">Show \"My Library\" as default screen</string>
+    <string name="remove_situations">Remove \"Play Music for…\"</string>
     <string name="album_grid_three_columns">Show three columns in album grids</string>
+    <string name="remove_recommendations">Remove recommendations</string>
     <string name="universal_art_replacer">Enable universal art replacer</string>
     <string name="universal_art_replacer_summary">Adds ability to replace any artist or album art in Google Play Music.
         You need to place an image file with exactly the same file name &amp; dimensions as in

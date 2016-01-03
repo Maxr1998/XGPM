@@ -24,6 +24,28 @@ public class MainStage {
                 defaultScreen.set(null, XposedHelpers.getStaticObjectField(findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader), "MY_LIBRARY"));
             }
 
+            // Remove "Play Music for…"
+            findAndHookMethod(GPM + ".ui.MaterialMainstageFragment.RecyclerAdapter", lPParam.classLoader, "showSituationCard", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getBoolean(Common.REMOVE_SITUATIONS, false)) {
+                        param.setResult(false);
+                    }
+                }
+            });
+
+            // Remove recommendations
+            findAndHookMethod(GPM + ".ui.MaterialMainstageFragment.RecyclerAdapter", lPParam.classLoader, "shouldShowRecommendationCluster", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getBoolean(Common.REMOVE_RECOMMENDATIONS, false)) {
+                        param.setResult(false);
+                    }
+                }
+            });
+
             // 3 columns
             findAndHookMethod(GPM + ".ui.common.GridFragment", lPParam.classLoader, "getScreenColumns", new XC_MethodHook() {
                 @Override
