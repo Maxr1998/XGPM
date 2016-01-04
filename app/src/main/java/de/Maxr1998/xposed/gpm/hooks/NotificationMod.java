@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.RippleDrawable;
@@ -35,6 +36,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.Maxr1998.xposed.gpm.Common;
@@ -46,10 +51,13 @@ import static de.Maxr1998.xposed.gpm.Common.GPM;
 import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
+import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
+import static de.robv.android.xposed.XposedHelpers.findAndHookConstructor;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getIntField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
+import static de.robv.android.xposed.XposedHelpers.getStaticObjectField;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class NotificationMod {
@@ -60,6 +68,12 @@ public class NotificationMod {
     public static final int CLICK_BASE_ID = IMAGE_BASE_ID + 10;
     public static final String INTENT_ACTION = "com.android.music.musicservicecommand.queue";
     public static final String SEEK_COUNT_INTENT_EXTRA = "queue_position";
+    private static Runnable META_DATA_RELOADER;
+    private static Object ART_LOADER_COMPLETION_LISTENER;
+    private static int CURRENT_TRACK_NR;
+    private static String[] TITLES = new String[8];
+    private static Object[] ART_REQUESTS = new Object[8];
+    private static Bitmap[] ART_BITMAPS = new Bitmap[8];
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
@@ -69,30 +83,15 @@ public class NotificationMod {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Context context = (Context) param.thisObject;
                     Notification mNotification = (Notification) param.getResult();
-                    Object playback = getObjectField(param.thisObject, "mDevicePlayback");
-                    int position = getIntField(playback, "mPlayPos");
-                    Cursor cursor = (Cursor) callMethod(callMethod(getObjectField(playback, "mPlayList"), "getWrappedSongList"), "createSyncCursor",
-                            new Class[]{Context.class, String[].class, String.class}, context, new String[]{"title", "VThumbnailUrl"}, "");
-
-                    int activeTitle = 2, start = position - 2;
-                    if (position < 3 || cursor.getCount() < 8) {
-                        activeTitle = position;
-                        start = 0;
-                    } else if (cursor.getCount() - position < 6) {
-                        activeTitle = 8 - (cursor.getCount() - position);
-                        start = cursor.getCount() - 8;
-                    }
-                    cursor.moveToPosition(start);
-                    String[] titles = new String[8];
                     for (int i = 0; i < 8; i++) {
-                        titles[i] = cursor.getPosition() < cursor.getCount() ? cursor.getString(0) : null;
-                        cursor.moveToNext();
-                    }
-                    for (int i = 0; i < 8; i++) {
-                        mNotification.bigContentView.setTextViewText(TEXT_BASE_ID + i, titles[i] != null ? i == activeTitle ? getBoldString(titles[i]) : titles[i] : "");
-                        mNotification.bigContentView.setImageViewResource(IMAGE_BASE_ID + i, titles[i] != null ? context.getResources().getIdentifier("bg_default_album_art", "drawable", GPM) : android.R.color.transparent);
+                        mNotification.bigContentView.setTextViewText(TEXT_BASE_ID + i, TITLES[i] != null ? i == CURRENT_TRACK_NR ? getBoldString(TITLES[i]) : TITLES[i] : "");
+                        if (TITLES[i] != null && ART_BITMAPS[i] != null) {
+                            mNotification.bigContentView.setImageViewBitmap(IMAGE_BASE_ID + i, ART_BITMAPS[i]);
+                        } else {
+                            mNotification.bigContentView.setImageViewResource(IMAGE_BASE_ID + i, TITLES[i] != null ? context.getResources().getIdentifier("bg_default_album_art", "drawable", GPM) : android.R.color.transparent);
+                        }
                         Intent queue = new Intent(INTENT_ACTION).setClass(context, context.getClass());
-                        queue.putExtra(SEEK_COUNT_INTENT_EXTRA, titles[i] != null ? i - activeTitle : 0xff);
+                        queue.putExtra(SEEK_COUNT_INTENT_EXTRA, TITLES[i] != null ? i - CURRENT_TRACK_NR : 0xff);
                         mNotification.bigContentView.setOnClickPendingIntent(CLICK_BASE_ID + i, PendingIntent.getService(context, (int) System.currentTimeMillis() + i, queue, PendingIntent.FLAG_UPDATE_CURRENT));
                     }
                 }
@@ -105,6 +104,7 @@ public class NotificationMod {
                         int count = intent.getIntExtra(SEEK_COUNT_INTENT_EXTRA, 0);
                         if (count != 0xff) {
                             Object devicePlayback = getObjectField(param.thisObject, "mDevicePlayback");
+                            callMethod(devicePlayback, "seek", 0L);
                             AtomicInteger seekCount = (AtomicInteger) getObjectField(devicePlayback, "mPendingMediaButtonSeekCount");
                             seekCount.addAndGet(count);
                             callMethod(devicePlayback, "handleMediaButtonSeek", new Class[]{boolean.class, int.class}, true, 4);
@@ -113,6 +113,95 @@ public class NotificationMod {
                     }
                 }
             });
+
+            findAndHookConstructor(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+                    META_DATA_RELOADER = new Runnable() {
+                        @SuppressWarnings("unchecked")
+                        @Override
+                        public void run() {
+                            try {
+                                Object mDevicePlayback = getObjectField(param.thisObject, "mDevicePlayback");
+                                int position = getIntField(mDevicePlayback, "mPlayPos");
+                                Object mSongList = callMethod(mDevicePlayback, "getMediaList");
+                                Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor",
+                                        new Class[]{Context.class, String[].class, String.class}, param.thisObject, new String[]{"title", "Nid", "album_id"}, "");
+
+                                final Object mArtTypeNotification = getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION");
+                                final Constructor mArtDescriptorConstructor = findClass(GPM + ".art.DocumentArtDescriptor", lPParam.classLoader)
+                                        .getConstructor(mArtTypeNotification.getClass(), int.class,
+                                                float.class, findClass(GPM + ".ui.cardlib.model.Document", lPParam.classLoader));
+                                final String url;
+                                if (findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(mSongList)) {
+                                    url = callMethod(mSongList, "getAlbumArtUrl", param.thisObject).toString();
+                                } else {
+                                    url = null;
+                                }
+
+                                // Detect positions
+                                CURRENT_TRACK_NR = 2;
+                                int start = position - 2;
+                                if (position < 3 || cursor.getCount() < 8) {
+                                    CURRENT_TRACK_NR = position;
+                                    start = 0;
+                                } else if (cursor.getCount() - position < 6) {
+                                    CURRENT_TRACK_NR = 8 - (cursor.getCount() - position);
+                                    start = cursor.getCount() - 8;
+                                }
+
+                                // Loading data
+                                cursor.moveToPosition(start);
+                                for (int i = 0; i < 8; i++) {
+                                    TITLES[i] = cursor.getPosition() < cursor.getCount() ? cursor.getString(0) : null;
+                                    if (ART_REQUESTS[i] != null) {
+                                        callMethod(ART_REQUESTS[i], "cancelRequest");
+                                        callMethod(ART_REQUESTS[i], "release");
+                                        ART_REQUESTS[i] = null;
+                                    }
+                                    String mMetajamId = cursor.getPosition() < cursor.getCount() ? cursor.getString(1) : null;
+                                    long mAlbumId = cursor.getPosition() < cursor.getCount() ? cursor.getLong(2) : 0;
+                                    if (mMetajamId != null && mAlbumId != 0) {
+                                        log("RENDERER: Starting " + i);
+                                        Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader), "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
+                                        Object mDescriptor = mArtDescriptorConstructor.newInstance(mArtTypeNotification, getObjectField(param.thisObject, "mArtSizePixels"), 1.0f, mDocument);
+                                        ART_REQUESTS[i] = callMethod(callStaticMethod(findClass(GPM + ".art.ArtResolver", lPParam.classLoader), "getInstance", param.thisObject), "getArt", mDescriptor, i == 7 ? ART_LOADER_COMPLETION_LISTENER : null);
+                                        callMethod(ART_REQUESTS[i], "retain");
+                                    }
+                                    cursor.moveToNext();
+                                }
+                            } catch (Throwable t) {
+                                log(t);
+                            }
+                        }
+                    };
+                    ART_LOADER_COMPLETION_LISTENER = Proxy.newProxyInstance(lPParam.classLoader, new Class[]{
+                            findClass(GPM + ".art.ArtResolver.RequestListener", lPParam.classLoader)}, new InvocationHandler() {
+                        @Override
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            for (int i = 0; i < ART_REQUESTS.length; i++) {
+                                if (ART_REQUESTS[i] != null && (boolean) callMethod(ART_REQUESTS[i], "didRenderSuccessfully")) {
+                                    log("RENDERER: Bitmap " + i + " rendered successfully");
+                                    ART_BITMAPS[i] = (Bitmap) callMethod(ART_REQUESTS[i], "getResultBitmap");
+                                } else {
+                                    ART_BITMAPS[i] = null;
+                                }
+                            }
+                            return null;
+                        }
+                    });
+                }
+            });
+
+            findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "updateNotificationAndMediaSessionMetadataAsync", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    Class async = findClass(GPM + ".utils.async.AsyncWorkers", lPParam.classLoader);
+                    Object sBackendServiceWorker = getStaticObjectField(async, "sBackendServiceWorker");
+                    callStaticMethod(async, "runAsync", sBackendServiceWorker, META_DATA_RELOADER);
+                }
+            });
+
             // Switch to old design
             findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "addLNotificationAction", Notification.Builder.class, Notification.WearableExtender.class, int.class, int.class, int.class, PendingIntent.class, new XC_MethodHook() {
                 @Override
@@ -275,27 +364,25 @@ public class NotificationMod {
                                 albumArt.setId(IMAGE_BASE_ID + i);
                                 albumArt.setScaleType(ImageView.ScaleType.FIT_CENTER);
                                 LinearLayout.LayoutParams imageParams = new LinearLayout.LayoutParams((int) (density * 32), (int) (density * 32));
-                                albumArt.setLayoutParams(imageParams);
                                 // Title text
                                 TextView titleText = new TextView(root.getContext());
                                 titleText.setId(TEXT_BASE_ID + i);
                                 titleText.setTextColor(Color.BLACK);
-                                titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+                                titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                                 titleText.setSingleLine();
                                 titleText.setMaxLines(1);
                                 titleText.setEllipsize(TextUtils.TruncateAt.END);
                                 titleText.setGravity(Gravity.CENTER_VERTICAL);
                                 titleText.setPadding((int) (density * 12), 0, (int) (density * 16), 0);
                                 LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, (int) (density * 32));
-                                titleText.setLayoutParams(textParams);
                                 // Click view
                                 View clickView = new View(root.getContext());
                                 clickView.setId(CLICK_BASE_ID + i);
                                 clickView.setVisibility(View.GONE);
                                 clickView.setClickable(true);
                                 // Add views
-                                titlesLayout.addView(albumArt);
-                                titlesLayout.addView(titleText);
+                                titlesLayout.addView(albumArt, imageParams);
+                                titlesLayout.addView(titleText, textParams);
                                 titlesLayout.addView(clickView);
                                 queueLayout.addView(titlesLayout);
                             }
