@@ -33,7 +33,7 @@ public class NavigationDrawer {
                     Map<Object, Class<?>> map = (Map<Object, Class<?>>) param.args[0];
                     Object playlistsItem = Enum.valueOf(screenClass, "NO_CONTENT");
                     setIntField(playlistsItem, "mTitleResId", 0x7f0b0395); // top_menu_playlists
-                    setIntField(playlistsItem, "mIconResourceId", 0x7f02014f); // ic_instant_mix_gray
+                    setIntField(playlistsItem, "mIconResourceId", 0x7f02014e); // ic_instant_mix_black
                     setIntField(playlistsItem, "mSelectedIconResourceId", 0x7f020150); // ic_instant_mix_orange
                     map.put(playlistsItem, findClass(GPM + ".ui.mylibrary.PlaylistRecyclerFragment", lPParam.classLoader));
                 }
