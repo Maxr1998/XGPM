@@ -3,11 +3,9 @@ package de.Maxr1998.xposed.gpm.hooks;
 import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Build;
 import android.os.Handler;
 
@@ -18,18 +16,13 @@ import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
-import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.CLICK_BASE_ID;
-import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.IMAGE_BASE_ID;
 import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.INTENT_ACTION;
 import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.SEEK_COUNT_INTENT_EXTRA;
-import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.TEXT_BASE_ID;
-import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.getBoldString;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
-import static de.robv.android.xposed.XposedHelpers.getIntField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
 @SuppressWarnings("unused")
@@ -43,33 +36,9 @@ public class NotificationModNext {
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     Service mService = (Service) param.thisObject;
                     Notification mNotification = (Notification) callStaticMethod(findClass(GPM + ".playback2.NotificationUtils", lPParam.classLoader), "buildNotification", param.thisObject, param.args[0]);
-                    int position = getIntField(mService, "position");// TODO
-                    Object songList = new Object(); // TODO
-                    Cursor cursor = (Cursor) callMethod(callMethod(songList, "getWrappedSongList"), "createSyncCursor",
-                            new Class[]{Context.class, String[].class, String.class}, mService, new String[]{"title", "VThumbnailUrl"}, "");
 
-                    int activeTitle = 2, start = position - 2;
+                    //TODO
 
-                    if (position < 3 || cursor.getCount() < 8) {
-                        activeTitle = position;
-                        start = 0;
-                    } else if (cursor.getCount() - position < 6) {
-                        activeTitle = 8 - (cursor.getCount() - position);
-                        start = cursor.getCount() - 8;
-                    }
-                    cursor.moveToPosition(start);
-                    String[] titles = new String[8];
-                    for (int i = 0; i < 8; i++) {
-                        titles[i] = cursor.getPosition() < cursor.getCount() ? cursor.getString(0) : null;
-                        cursor.moveToNext();
-                    }
-                    for (int i = 0; i < 8; i++) {
-                        mNotification.bigContentView.setTextViewText(TEXT_BASE_ID + i, titles[i] != null ? i == activeTitle ? getBoldString(titles[i]) : titles[i] : "");
-                        mNotification.bigContentView.setImageViewResource(IMAGE_BASE_ID + i, titles[i] != null ? mService.getResources().getIdentifier("bg_default_album_art", "drawable", GPM) : android.R.color.transparent);
-                        Intent queue = new Intent(INTENT_ACTION).setClass(mService, mService.getClass());
-                        queue.putExtra(SEEK_COUNT_INTENT_EXTRA, titles[i] != null ? i - activeTitle : 0xff);
-                        mNotification.bigContentView.setOnClickPendingIntent(CLICK_BASE_ID + i, PendingIntent.getService(mService, (int) System.currentTimeMillis() + i, queue, PendingIntent.FLAG_UPDATE_CURRENT));
-                    }
                     if (((boolean) callMethod(mService, "isForeground"))) {
                         callMethod(mService, "startForegroundService", 1, mNotification);
                     } else {
