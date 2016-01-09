@@ -11,13 +11,12 @@ import android.os.Handler;
 
 import java.util.List;
 
+import de.Maxr1998.trackselectorlib.NotificationHelper;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
-import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.INTENT_ACTION;
-import static de.Maxr1998.xposed.gpm.hooks.NotificationMod.SEEK_COUNT_EXTRA;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
@@ -52,8 +51,8 @@ public class NotificationModNext {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     Intent intent = (Intent) param.args[0];
-                    if (intent != null && intent.getAction() != null && intent.getAction().equals(INTENT_ACTION) && intent.hasExtra(SEEK_COUNT_EXTRA)) {
-                        int count = intent.getIntExtra(SEEK_COUNT_EXTRA, 0);
+                    if (NotificationHelper.checkIntent(intent)) {
+                        int count = NotificationHelper.getPosition(intent);
                         if (count != 0xff) {
                             callMethod(param.thisObject, "Switching to count " + count);
                             // EXECUTION CONTEXT

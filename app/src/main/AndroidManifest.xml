@@ -2,6 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="de.Maxr1998.xposed.gpm">
 
+    <uses-sdk tools:overrideLibrary="de.Maxr1998.trackselectorlib" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

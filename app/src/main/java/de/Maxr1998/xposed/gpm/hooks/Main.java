@@ -53,8 +53,6 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
                     }
                 });
             }
-        } else if (lPParam.packageName.equals("com.android.systemui") && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            NotificationMod.initUI(lPParam);
         }
     }
 

@@ -46,6 +46,9 @@ if (propFile.exists()) {
 }
 
 repositories {
+    maven {
+        url "https://dl.bintray.com/maxr1998/maven/"
+    }
     flatDir {
         dirs 'libs'
     }
@@ -54,5 +57,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.android.support:palette-v7:23.1.1'
+    compile 'de.Maxr1998:track-selector-lib:1.0'
     provided files('lib/XposedBridgeApi-20150213.jar')
 }
