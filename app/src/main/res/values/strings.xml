@@ -39,7 +39,7 @@
 
     <string name="category_notification">Notification</string>
     <string name="notification_narrow">Use old notification design</string>
-    <string name="notification_narrow_summary">Remove thumbs up and down actions, show big album art</string>
+    <string name="notification_narrow_summary">Remove thumbs up and down actions, show big album art\nNote: Only works on Android Lollipop and above</string>
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Hide XGPM from launcher</string>
