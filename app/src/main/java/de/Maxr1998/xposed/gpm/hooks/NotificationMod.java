@@ -99,22 +99,16 @@ public class NotificationMod {
                                             .setTitle(cursor.getString(0))
                                             .setArtist(cursor.getString(3))
                                             .setDuration(callStaticMethod(findClass(GPM + ".utils.MusicUtils", lPParam.classLoader), "makeTimeString", mService, cursor.getInt(4) / 1000).toString());
-                                    String mMetajamId = cursor.getPosition() < cursor.getCount() ? cursor.getString(1) : null;
-                                    long mAlbumId = cursor.getPosition() < cursor.getCount() ? cursor.getLong(2) : 0;
+                                    String mMetajamId = cursor.getString(1);
+                                    long mAlbumId = cursor.getLong(2);
                                     if (mMetajamId != null && mAlbumId != 0) {
                                         Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader), "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
                                         Object mDescriptor = mArtDescriptorConstructor.newInstance(mArtTypeNotification, (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
                                         Object mArtResolver = callStaticMethod(findClass(GPM + ".art.ArtResolver", lPParam.classLoader), "getInstance", mService);
                                         Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
-                                        boolean doRequest = true;
-                                        if (mRequest != null) {
-                                            if ((boolean) callMethod(mRequest, "didRenderSuccessfully")) {
-                                                track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
-                                                doRequest = false;
-                                            }
-                                            callMethod(mRequest, "release");
-                                        }
-                                        if (doRequest) {
+                                        if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
+                                            track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
+                                        } else {
                                             mRequest = callMethod(mArtResolver, "getArt", mDescriptor, ART_LOADER_COMPLETION_LISTENER);
                                             track.id = mAlbumId;
                                             callMethod(mRequest, "retain");
@@ -141,9 +135,9 @@ public class NotificationMod {
                                     if ((boolean) callMethod(mRequest, "didRenderSuccessfully")) {
                                         TRACKS_COMPAT.get(i).setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
                                     }
-                                    callMethod(mRequest, "release");
                                 }
                             }
+                            callMethod(mRequest, "release");
                             return null;
                         }
                     });
