@@ -46,9 +46,6 @@ if (propFile.exists()) {
 }
 
 repositories {
-    maven {
-        url "https://dl.bintray.com/maxr1998/maven/"
-    }
     flatDir {
         dirs 'libs'
     }
