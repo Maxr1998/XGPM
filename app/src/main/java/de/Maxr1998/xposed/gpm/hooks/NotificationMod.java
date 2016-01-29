@@ -45,7 +45,6 @@ public class NotificationMod {
     private static Object ART_LOADER_COMPLETION_LISTENER;
 
     private static ArrayList<TrackItem> TRACKS_COMPAT = new ArrayList<>();
-    private static ArrayList<Bundle> TRACKS = new ArrayList<>();
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
@@ -56,12 +55,13 @@ public class NotificationMod {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Context mContext = (Context) param.thisObject;
                     Notification mNotification = (Notification) param.getResult();
-                    TRACKS.clear();
+                    ArrayList<Bundle> tracks = new ArrayList<>();
+                    tracks.clear();
                     for (int i = 0; i < TRACKS_COMPAT.size(); i++) {
-                        TRACKS.add(TRACKS_COMPAT.get(i).get());
+                        tracks.add(TRACKS_COMPAT.get(i).get());
                     }
                     TRACKS_COMPAT.clear();
-                    NotificationHelper.insertToNotification(mNotification, TRACKS, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
+                    NotificationHelper.insertToNotification(mNotification, tracks, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
                 }
             });
             // Initialize data loader
@@ -130,7 +130,7 @@ public class NotificationMod {
                             }
                             Object mRequest = args[0];
                             long mId = getLongField(getObjectField(getObjectField(mRequest, "mDescriptor"), "identifier"), "mId");
-                            for (int i = 0; i < TRACKS.size(); i++) {
+                            for (int i = 0; i < TRACKS_COMPAT.size(); i++) {
                                 if (mId == TRACKS_COMPAT.get(i).id) {
                                     if ((boolean) callMethod(mRequest, "didRenderSuccessfully")) {
                                         TRACKS_COMPAT.get(i).setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
