@@ -55,13 +55,14 @@ public class NotificationMod {
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Context mContext = (Context) param.thisObject;
                     Notification mNotification = (Notification) param.getResult();
-                    ArrayList<Bundle> tracks = new ArrayList<>();
-                    tracks.clear();
-                    for (int i = 0; i < TRACKS_COMPAT.size(); i++) {
-                        tracks.add(TRACKS_COMPAT.get(i).get());
+                    if (NotificationHelper.isSupported(mNotification)) {
+                        ArrayList<Bundle> tracks = new ArrayList<>();
+                        for (int i = 0; i < TRACKS_COMPAT.size(); i++) {
+                            tracks.add(TRACKS_COMPAT.get(i).get());
+                        }
+                        TRACKS_COMPAT.clear();
+                        NotificationHelper.insertToNotification(mNotification, tracks, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
                     }
-                    TRACKS_COMPAT.clear();
-                    NotificationHelper.insertToNotification(mNotification, tracks, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
                 }
             });
             // Initialize data loader
