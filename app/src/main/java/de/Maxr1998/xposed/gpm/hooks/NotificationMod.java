@@ -12,7 +12,6 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -80,10 +79,6 @@ public class NotificationMod {
                                 Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class, String.class},
                                         mService, new String[]{"title", "Nid", "album_id", "artist", "duration"}, "");
 
-                                final Object mArtTypeNotification = getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION");
-                                final Constructor mArtDescriptorConstructor = findClass(GPM + ".art.DocumentArtDescriptor", lPParam.classLoader)
-                                        .getConstructor(mArtTypeNotification.getClass(), int.class,
-                                                float.class, findClass(GPM + ".ui.cardlib.model.Document", lPParam.classLoader));
                                 final String url;
                                 if (findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(mSongList)) {
                                     url = callMethod(mSongList, "getAlbumArtUrl", mService).toString();
@@ -104,7 +99,9 @@ public class NotificationMod {
                                     long mAlbumId = cursor.getLong(2);
                                     if (mMetajamId != null && mAlbumId != 0) {
                                         Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader), "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
-                                        Object mDescriptor = mArtDescriptorConstructor.newInstance(mArtTypeNotification, (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
+                                        Object mDescriptor = callMethod(callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader), "getArtDescriptorFactory"),
+                                                "createArtDescriptor", getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION"),
+                                                (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
                                         Object mArtResolver = callStaticMethod(findClass(GPM + ".art.ArtResolver", lPParam.classLoader), "getInstance", mService);
                                         Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
                                         if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
@@ -191,7 +188,9 @@ public class NotificationMod {
                         int accessibilityId = (int) param.args[4];
                         int thumbsUpId = res.getIdentifier("accessibility_thumbsUp", "string", GPM);
                         int thumbsDownId = res.getIdentifier("accessibility_thumbsDown", "string", GPM);
+                        log("DEBUG: " + Integer.toHexString(accessibilityId));
                         if (accessibilityId == thumbsUpId || accessibilityId == thumbsDownId) {
+                            log("DEBUG: true");
                             param.setResult(null);
                         }
                     }
