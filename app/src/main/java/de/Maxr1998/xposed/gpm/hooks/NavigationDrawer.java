@@ -1,5 +1,9 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.app.Activity;
+import android.content.res.Resources;
+import android.os.Bundle;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,14 +31,22 @@ public class NavigationDrawer {
             final Class homeMenuScreensClass = findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader);
 
             // Make playlist item show playlist fragment
+            findAndHookMethod(GPM + ".ui.BaseActivity", lPParam.classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    Resources res = ((Activity) param.thisObject).getResources();
+                    Object playlistsItem = Enum.valueOf(screenClass, "NO_CONTENT");
+                    setIntField(playlistsItem, "mTitleResId", res.getIdentifier("top_menu_playlists", "string", GPM));
+                    setIntField(playlistsItem, "mIconResourceId", res.getIdentifier("ic_instant_mix_black", "drawable", GPM));
+                    setIntField(playlistsItem, "mSelectedIconResourceId", res.getIdentifier("ic_instant_mix_orange", "drawable", GPM));
+                }
+            });
+
             findAndHookMethod(screenClass, "addCommonFragments", Map.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     Map<Object, Class<?>> map = (Map<Object, Class<?>>) param.args[0];
                     Object playlistsItem = Enum.valueOf(screenClass, "NO_CONTENT");
-                    setIntField(playlistsItem, "mTitleResId", 0x7f0b0395); // top_menu_playlists
-                    setIntField(playlistsItem, "mIconResourceId", 0x7f02014e); // ic_instant_mix_black
-                    setIntField(playlistsItem, "mSelectedIconResourceId", 0x7f020150); // ic_instant_mix_orange
                     map.put(playlistsItem, findClass(GPM + ".ui.mylibrary.PlaylistRecyclerFragment", lPParam.classLoader));
                 }
             });
