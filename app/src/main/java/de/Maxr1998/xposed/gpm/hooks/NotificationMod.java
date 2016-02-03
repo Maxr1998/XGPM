@@ -188,9 +188,7 @@ public class NotificationMod {
                         int accessibilityId = (int) param.args[4];
                         int thumbsUpId = res.getIdentifier("accessibility_thumbsUp", "string", GPM);
                         int thumbsDownId = res.getIdentifier("accessibility_thumbsDown", "string", GPM);
-                        log("DEBUG: " + Integer.toHexString(accessibilityId));
                         if (accessibilityId == thumbsUpId || accessibilityId == thumbsDownId) {
-                            log("DEBUG: true");
                             param.setResult(null);
                         }
                     }
