@@ -2,7 +2,7 @@ package de.Maxr1998.xposed.gpm;
 
 import android.os.Environment;
 
-public class Common {
+public final class Common {
     public static final String XGPM = "de.Maxr1998.xposed.gpm";
     public static final String GPM = "com.google.android.music";
     //
