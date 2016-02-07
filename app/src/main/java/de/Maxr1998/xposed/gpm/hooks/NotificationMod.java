@@ -16,6 +16,8 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.Maxr1998.trackselectorlib.NotificationHelper;
@@ -88,28 +90,34 @@ public class NotificationMod {
                                 TRACKS_COMPAT.clear();
 
                                 // Loading data
-                                log("RENDERER: Starting…");
+                                Set<Long> ids = new HashSet<>();
                                 cursor.moveToPosition(0);
+                                int position = getIntField(mDevicePlayback, "mPlayPos");
                                 do {
                                     TrackItem track = new TrackItem()
                                             .setTitle(cursor.getString(0))
                                             .setArtist(cursor.getString(3))
                                             .setDuration(callStaticMethod(findClass(GPM + ".utils.MusicUtils", lPParam.classLoader), "makeTimeString", mService, cursor.getInt(4) / 1000).toString());
-                                    String mMetajamId = cursor.getString(1);
-                                    long mAlbumId = cursor.getLong(2);
-                                    if (mMetajamId != null && mAlbumId != 0) {
-                                        Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader), "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
-                                        Object mDescriptor = callMethod(callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader), "getArtDescriptorFactory"),
-                                                "createArtDescriptor", getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION"),
-                                                (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
-                                        Object mArtResolver = callStaticMethod(findClass(GPM + ".art.ArtResolver", lPParam.classLoader), "getInstance", mService);
-                                        Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
-                                        if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
-                                            track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
-                                        } else {
-                                            mRequest = callMethod(mArtResolver, "getArt", mDescriptor, ART_LOADER_COMPLETION_LISTENER);
-                                            track.id = mAlbumId;
-                                            callMethod(mRequest, "retain");
+                                    if (Math.abs(position - cursor.getPosition()) < 40) {
+                                        String mMetajamId = cursor.getString(1);
+                                        long mAlbumId = cursor.getLong(2);
+                                        if (mMetajamId != null && mAlbumId != 0) {
+                                            Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader), "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
+                                            Object mDescriptor = callMethod(callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader), "getArtDescriptorFactory"),
+                                                    "createArtDescriptor", getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION"),
+                                                    (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
+                                            Object mArtResolver = callStaticMethod(findClass(GPM + ".art.ArtResolver", lPParam.classLoader), "getInstance", mService);
+                                            Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
+                                            if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
+                                                track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
+                                            } else {
+                                                track.id = mAlbumId;
+                                                if (!ids.contains(track.id)) {
+                                                    mRequest = callMethod(mArtResolver, "getArt", mDescriptor, ART_LOADER_COMPLETION_LISTENER);
+                                                    callMethod(mRequest, "retain");
+                                                    ids.add(track.id);
+                                                }
+                                            }
                                         }
                                     }
                                     TRACKS_COMPAT.add(track);
