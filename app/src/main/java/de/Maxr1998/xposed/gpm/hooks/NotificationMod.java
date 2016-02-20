@@ -78,6 +78,9 @@ public class NotificationMod {
                                 Context mService = (Context) param.thisObject;
                                 Object mDevicePlayback = getObjectField(mService, "mDevicePlayback");
                                 Object mSongList = callMethod(mDevicePlayback, "getMediaList");
+                                if (mSongList == null) {
+                                    return;
+                                }
                                 Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class, String.class},
                                         mService, new String[]{"title", "Nid", "album_id", "artist", "duration"}, "");
 
@@ -106,7 +109,7 @@ public class NotificationMod {
                                             Object mDescriptor = callMethod(callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader), "getArtDescriptorFactory"),
                                                     "createArtDescriptor", getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION"),
                                                     (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
-                                            Object mArtResolver = callStaticMethod(findClass(GPM + ".art.ArtResolver", lPParam.classLoader), "getInstance", mService);
+                                            Object mArtResolver = callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader), "getArtResolver", mService);
                                             Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
                                             if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
                                                 track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
@@ -170,7 +173,7 @@ public class NotificationMod {
                             callMethod(mDevicePlayback, "seek", 0L);
                             AtomicInteger seekCount = (AtomicInteger) getObjectField(mDevicePlayback, "mPendingMediaButtonSeekCount");
                             seekCount.addAndGet(count);
-                            callMethod(mDevicePlayback, "handleMediaButtonSeek", new Class[]{boolean.class, int.class}, true, 4);
+                            callMethod(mDevicePlayback, "handleMediaButtonSeek", callStaticMethod(findClass(GPM + ".playback.PlaybackJustification", lPParam.classLoader), "userNext"));
                         } else {
                             if (!(boolean) callMethod(mDevicePlayback, "isPlaying")) {
                                 callMethod(mDevicePlayback, "play");
