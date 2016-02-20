@@ -13,6 +13,7 @@ import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
+import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 
@@ -46,12 +47,16 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
 
             // Debug
             if (BuildConfig.DEBUG) {
-                findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), new XC_MethodReplacement() {
-                    @Override
-                    protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                        return true;
-                    }
-                });
+                try {
+                    findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), new XC_MethodReplacement() {
+                        @Override
+                        protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                            return true;
+                        }
+                    });
+                } catch (Throwable t) {
+                    log(t);
+                }
             }
         }
     }
