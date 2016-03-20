@@ -100,7 +100,7 @@ public class NotificationMod {
                                     TrackItem track = new TrackItem()
                                             .setTitle(cursor.getString(0))
                                             .setArtist(cursor.getString(3))
-                                            .setDuration(callStaticMethod(findClass(GPM + ".utils.MusicUtils", lPParam.classLoader), "makeTimeString", mService, cursor.getInt(4) / 1000).toString());
+                                            .setDuration(callStaticMethod(findClass(GPM + ".utils.StringUtils", lPParam.classLoader), "makeTimeString", mService, cursor.getInt(4)).toString());
                                     if (Math.abs(position - cursor.getPosition()) < 40) {
                                         String mMetajamId = cursor.getString(1);
                                         long mAlbumId = cursor.getLong(2);
