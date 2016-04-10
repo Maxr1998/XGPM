@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             getPreferenceManager().setSharedPreferencesMode(Context.MODE_WORLD_READABLE);
             addPreferencesFromResource(R.xml.preferences);
 
-            mainComponent = new ComponentName(getActivity(), MainActivity.class.getName());
+            mainComponent = new ComponentName(getActivity(), getActivity().getApplication().getPackageName() + ".Main");
             ((TwoStatePreference) findPreference(Common.HIDE_APP_FROM_LAUNCHER)).setChecked(getActivity().getPackageManager()
                     .getComponentEnabledSetting(mainComponent) == PackageManager.COMPONENT_ENABLED_STATE_DISABLED);
         }
