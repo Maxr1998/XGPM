@@ -11,6 +11,7 @@ import java.util.Map;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
@@ -102,6 +103,22 @@ public class NavigationDrawer {
                     if (PREFS.getBoolean(Common.DRAWER_HIDE_UNLIMITED, false)) {
                         param.args[0] = null;
                     }
+                }
+            });
+
+
+            // Enable podcasts
+            findAndHookMethod(GPM + ".utils.ConfigUtils", lPParam.classLoader, "isPodcastsEnabled", new XC_MethodReplacement() {
+                @Override
+                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                    return true;
+                }
+            });
+
+            findAndHookMethod(GPM + ".utils.ConfigUtils", lPParam.classLoader, "isPodcastSyncEnabled", new XC_MethodReplacement() {
+                @Override
+                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                    return true;
                 }
             });
         } catch (Throwable t) {
