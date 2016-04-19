@@ -81,8 +81,8 @@ public class NotificationMod {
                                 if (mSongList == null) {
                                     return;
                                 }
-                                Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class, String.class},
-                                        mService, new String[]{"title", "Nid", "album_id", "artist", "duration"}, "");
+                                Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class},
+                                        mService, new String[]{"title", "Nid", "album_id", "artist", "duration"});
 
                                 final String url;
                                 if (findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(mSongList)) {

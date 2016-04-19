@@ -1,6 +1,7 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 
@@ -63,7 +64,7 @@ public class NavigationDrawer {
             });
 
             // Remove disabled drawer items
-            findAndHookMethod(homeMenuScreensClass, "getMenuScreens", new XC_MethodHook() {
+            findAndHookMethod(homeMenuScreensClass, "getMenuScreens", Context.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     PREFS.reload();
