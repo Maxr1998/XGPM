@@ -1,5 +1,6 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.content.Context;
 import android.os.Build;
 
 import de.Maxr1998.xposed.gpm.BuildConfig;
@@ -44,6 +45,14 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 NotificationMod.init(lPParam);
             }
+
+            // Enable voice control
+            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isSnappleEnabled", Context.class, new XC_MethodReplacement() {
+                @Override
+                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                    return true;
+                }
+            });
 
             // Debug
             if (BuildConfig.DEBUG) {
