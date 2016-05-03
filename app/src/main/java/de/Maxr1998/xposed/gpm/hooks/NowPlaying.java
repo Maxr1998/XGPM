@@ -52,6 +52,8 @@ import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
 public class NowPlaying {
 
+    private static final int EQ_BUTTON_ID = 0xE01;
+
     private static int lastColor = 0;
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
@@ -121,20 +123,6 @@ public class NowPlaying {
                     // Global vars
                     RelativeLayout header = (RelativeLayout) lIParam.view.findViewById(lIParam.res.getIdentifier("top_wrapper_right", "id", GPM));
                     View queueSwitcher = header.findViewById(lIParam.res.getIdentifier("queue_switcher", "id", GPM));
-                    View overflow = header.findViewById(lIParam.res.getIdentifier("overflow", "id", GPM));
-
-                    // Touch feedback
-                    @SuppressLint("InlinedApi") TypedArray a = header.getContext().obtainStyledAttributes(new int[]{Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                            ? android.R.attr.selectableItemBackgroundBorderless : android.R.attr.selectableItemBackground});
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        queueSwitcher.setBackground(a.getDrawable(0));
-                        overflow.setBackground(a.getDrawable(0));
-                    } else {
-                        //noinspection deprecation
-                        queueSwitcher.setBackgroundDrawable(a.getDrawable(0));
-                        //noinspection deprecation
-                        overflow.setBackgroundDrawable(a.getDrawable(0));
-                    }
 
                     // Add EQ button
                     if (PREFS.getBoolean(Common.NP_ADD_EQ_SHORTCUT, false)) {
@@ -142,16 +130,20 @@ public class NowPlaying {
                         header.addView(eqButton, 0);
                         RelativeLayout.LayoutParams queueParams = (RelativeLayout.LayoutParams) queueSwitcher.getLayoutParams();
                         queueParams.addRule(RelativeLayout.RIGHT_OF, 0);
-                        queueParams.addRule(RelativeLayout.RIGHT_OF, lIParam.res.getIdentifier("plain", "id", GPM));
-                        queueParams.setMargins(0, 0, 0, 0);
+                        queueParams.addRule(RelativeLayout.RIGHT_OF, EQ_BUTTON_ID);
+                        eqButton.setVisibility(queueSwitcher.getVisibility());
+                    }
+
+                    // Touch feedback
+                    @SuppressLint("InlinedApi") TypedArray a = header.getContext().obtainStyledAttributes(new int[]{Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                            ? android.R.attr.selectableItemBackgroundBorderless : android.R.attr.selectableItemBackground});
+                    for (int i = 0; i < header.getChildCount(); i++) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                            queueParams.setMarginStart(0);
-                            eqButton.setBackground(a.getDrawable(0));
+                            header.getChildAt(i).setBackground(a.getDrawable(0));
                         } else {
                             //noinspection deprecation
-                            eqButton.setBackgroundDrawable(a.getDrawable(0));
+                            header.getChildAt(i).setBackgroundDrawable(a.getDrawable(0));
                         }
-                        eqButton.setVisibility(queueSwitcher.getVisibility());
                     }
                     a.recycle();
 
@@ -163,6 +155,7 @@ public class NowPlaying {
                         pagerLayoutParams.addRule(RelativeLayout.ABOVE, lIParam.res.getIdentifier("play_controls", "id", GPM));
                         pager.setLayoutParams(pagerLayoutParams);
                     }
+
                     // Improve playback controls visibility
                     if (PREFS.getBoolean(Common.NP_REMOVE_DROP_SHADOW, false)) {
                         ImageView repeat = (ImageView) lIParam.view.findViewById(lIParam.res.getIdentifier("repeat", "id", GPM)),
@@ -222,7 +215,7 @@ public class NowPlaying {
                                 public void run() {
                                     tintUI(nowPlayingFragment);
                                 }
-                            }, 400);
+                            }, 200);
                         }
                     }
                     break;
@@ -241,14 +234,12 @@ public class NowPlaying {
     private static ImageButton getEQButton(Context c, XModuleResources xModRes) throws Throwable {
         Resources res = c.getResources();
         ImageButton eqButton = new ImageButton(c);
-        eqButton.setId(res.getIdentifier("plain", "id", GPM));
+        //noinspection ResourceType
+        eqButton.setId(EQ_BUTTON_ID);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                 res.getDimensionPixelSize(res.getIdentifier("nowplaying_screen_info_block_width", "dimen", GPM)),
                 res.getDimensionPixelSize(res.getIdentifier("nowplaying_screen_info_block_height", "dimen", GPM)));
-        params.setMargins((int) res.getDisplayMetrics().density * 16, 0, 0, 0);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            params.setMarginStart((int) res.getDisplayMetrics().density * 16);
-        }
+        params.addRule(RelativeLayout.RIGHT_OF, res.getIdentifier("voice_control", "id", GPM));
         eqButton.setLayoutParams(params);
         //noinspection deprecation
         eqButton.setImageDrawable(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? xModRes.getDrawable(R.drawable.ic_equalizer_black_24dp, null) : xModRes.getDrawable(R.drawable.ic_equalizer_black_24dp));
