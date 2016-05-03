@@ -12,16 +12,17 @@ android {
         targetSdkVersion 23
         versionCode 22
         versionName "1.8.8"
-        signingConfig signingConfigs.main
     }
     buildTypes {
         release {
+            signingConfig signingConfigs.main
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-conf.txt'
             minifyEnabled true
             shrinkResources true
             debuggable false
         }
         debug {
+            signingConfig signingConfigs.main
             debuggable true
         }
     }
