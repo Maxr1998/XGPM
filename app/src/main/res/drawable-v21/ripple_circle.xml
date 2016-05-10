@@ -4,5 +4,4 @@
     <item
         android:id="@android:id/mask"
         android:drawable="@drawable/circle_mask" />
-    <item android:drawable="@drawable/circle" />
 </ripple>
