@@ -44,4 +44,6 @@
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Hide XGPM from launcher</string>
+
+    <string name="donate">Donate to the developer</string>
 </resources>

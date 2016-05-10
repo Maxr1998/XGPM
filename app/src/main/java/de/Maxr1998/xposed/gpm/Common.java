@@ -24,5 +24,7 @@ public final class Common {
     //
     public static final String HIDE_APP_FROM_LAUNCHER = "hide_from_launcher";
     //
+    public static final String DONATE = "donate";
+    //
     public static final String ART_CACHE_OVERLAY_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/ArtCacheOverlay/";
 }

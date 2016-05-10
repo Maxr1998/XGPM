@@ -56,4 +56,7 @@
             android:key="hide_from_launcher"
             android:title="@string/hide_from_launcher" />
     </PreferenceCategory>
+    <Preference
+        android:key="donate"
+        android:title="@string/donate" />
 </PreferenceScreen>
