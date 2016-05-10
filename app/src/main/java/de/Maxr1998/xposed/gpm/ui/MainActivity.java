@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case Common.DONATE:
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse("http://maxr1998.de/#donate"));
+                    intent.setData(Uri.parse("https://maxr1998.de/#donate"));
                     startActivity(intent);
                     return true;
                 default:
