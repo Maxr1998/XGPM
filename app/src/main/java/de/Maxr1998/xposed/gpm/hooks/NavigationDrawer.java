@@ -28,6 +28,15 @@ public class NavigationDrawer {
     @SuppressWarnings("unchecked")
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
+            // Enable new adaptive home | Disabled until URL gets added
+            /*findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isAdaptiveHomeEnabled", Context.class, new XC_MethodReplacement() {
+                @Override
+                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                    return true;
+                }
+            });
+            setStaticObjectField(findClass(GPM + ".sync.api.MusicUrl", lPParam.classLoader), "MUSIC_PA_URL_HOST", "https://mclients.googleapis.com/");*/
+
             // Constant classes
             final Class screenClass = findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader);
             final Class homeMenuScreensClass = findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader);
@@ -106,7 +115,6 @@ public class NavigationDrawer {
                     }
                 }
             });
-
 
             // Enable podcasts
             findAndHookMethod(GPM + ".utils.ConfigUtils", lPParam.classLoader, "isPodcastsEnabled", new XC_MethodReplacement() {
