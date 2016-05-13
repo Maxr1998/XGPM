@@ -302,7 +302,7 @@ public class NowPlaying {
 
                         RelativeLayout.LayoutParams progressLayoutParams = (RelativeLayout.LayoutParams) progress.getLayoutParams();
                         progressLayoutParams.addRule(RelativeLayout.ABOVE, 0);
-                        progressLayoutParams.bottomMargin = (int) (-12 * res.getDisplayMetrics().density);
+                        progressLayoutParams.bottomMargin = (int) (-16 * res.getDisplayMetrics().density);
                         customProgressBar.addView(disconnect(progress));
 
                         View currentTime = disconnect(nowPlayingLayout.findViewById(res.getIdentifier("currenttime", "id", GPM)));
