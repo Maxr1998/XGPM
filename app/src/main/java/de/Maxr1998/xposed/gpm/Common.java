@@ -15,10 +15,13 @@ public final class Common {
     public static final String NAV_DRAWER_HIDDEN_ITEMS = "nav_drawer_hidden_items";
     public static final String DRAWER_HIDE_UNLIMITED = "drawer_hide_unlimited";
     //
-    public static final String NP_ADD_EQ_SHORTCUT = "np_add_eq";
+    public static final String NP_NEW_DESIGN = "np_new_design";
+    public static final String NP_TINT_ICONS = "np_tint_icons";
     public static final String NP_RESIZE_COVERS = "np_resize_covers";
     public static final String NP_REMOVE_DROP_SHADOW = "np_remove_drop_shadow";
-    public static final String NP_TINT_ICONS = "np_tint_icons";
+    public static final String NP_ADD_EQ_SHORTCUT = "np_add_eq";
+    public static final String NP_HIDE_YT_ICONS = "np_hide_yt_icons";
+
     //
     public static final String NOTIFICATION_NARROW = "notification_narrow";
     //

@@ -30,20 +30,30 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_now_playing">
         <SwitchPreference
-            android:key="np_add_eq"
-            android:summary="@string/np_add_eq_summary"
-            android:title="@string/np_add_eq" />
-        <SwitchPreference
-            android:key="np_resize_covers"
-            android:summary="@string/np_resize_covers_summary"
-            android:title="@string/np_resize_covers" />
-        <SwitchPreference
-            android:key="np_remove_drop_shadow"
-            android:title="@string/np_remove_drop_shadow" />
+            android:disableDependentsState="true"
+            android:key="np_new_design"
+            android:summary="@string/np_new_design_summary"
+            android:title="@string/np_new_design" />
         <SwitchPreference
             android:key="np_tint_icons"
             android:summary="@string/np_tint_icons_summary"
             android:title="@string/np_tint_icons" />
+        <SwitchPreference
+            android:dependency="np_new_design"
+            android:key="np_resize_covers"
+            android:summary="@string/np_resize_covers_summary"
+            android:title="@string/np_resize_covers" />
+        <SwitchPreference
+            android:dependency="np_new_design"
+            android:key="np_remove_drop_shadow"
+            android:title="@string/np_remove_drop_shadow" />
+        <SwitchPreference
+            android:key="np_add_eq"
+            android:summary="@string/np_add_eq_summary"
+            android:title="@string/np_add_eq" />
+        <SwitchPreference
+            android:key="np_hide_yt_icons"
+            android:title="@string/np_hide_yt_icons" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_notification">
         <SwitchPreference
