@@ -13,6 +13,9 @@ android {
         versionCode 22
         versionName "1.8.8"
         resConfigs "en"
+        vectorDrawables {
+            generatedDensities = ["hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
+        }
     }
     buildTypes {
         release {
