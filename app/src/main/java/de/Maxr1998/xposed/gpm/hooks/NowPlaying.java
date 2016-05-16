@@ -8,6 +8,7 @@ import android.content.res.TypedArray;
 import android.content.res.XModuleResources;
 import android.content.res.XResources;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ClipDrawable;
@@ -481,6 +482,11 @@ public class NowPlaying {
                     tintQueueButton(nowPlayingFragment);
                 }
                 // Tint all the rest
+                for (Object pager : new Object[]{getObjectField(nowPlayingFragment, "mHeaderPager"), artPager}) {
+                    for (Object edgeEffectCompat : new Object[]{getObjectField(pager, "mLeftEdge"), getObjectField(pager, "mRightEdge")}) {
+                        ((Paint) getObjectField(getObjectField(edgeEffectCompat, "mEdgeEffect"), "mPaint")).setColor(lastColor);
+                    }
+                }
                 SeekBar seekBar = (SeekBar) getObjectField(nowPlayingFragment, "mProgress");
                 LayerDrawable progress = (LayerDrawable) seekBar.getProgressDrawable().getCurrent();
                 ClipDrawable clipProgress = (ClipDrawable) progress.findDrawableByLayerId(root.getResources().getIdentifier("progress", "id", "android"));
