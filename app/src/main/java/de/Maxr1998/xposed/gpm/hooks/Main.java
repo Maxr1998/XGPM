@@ -36,6 +36,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
             PREFS.reload();
             // UI
             MainStage.init(lPParam);
+            MyLibrary.init(lPParam);
             NavigationDrawer.init(lPParam);
             NowPlaying.init(lPParam);
             TrackList.init(lPParam);

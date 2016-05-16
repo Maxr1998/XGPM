@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="my_library_tabs">
+        <item>PlaylistRecyclerFragment</item>
+        <item>MyRadioFragment</item>
+        <item>ArtistsGridViewFragment</item>
+        <item>AlbumsGridViewFragment</item>
+        <item>AllTracksFragment</item>
+        <item>GenreAlbumGridViewFragment</item>
+    </string-array>
+
     <string-array name="nav_drawer_items">
         <item>top_charts</item>
         <item>new_releases</item>

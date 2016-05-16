@@ -8,11 +8,16 @@
             android:key="remove_situations"
             android:title="@string/remove_situations" />
         <CustomSwitchPreference
-            android:key="album_grid_three_columns"
-            android:title="@string/album_grid_three_columns" />
-        <CustomSwitchPreference
             android:key="remove_recommendations"
             android:title="@string/remove_recommendations" />
+        <MultiSelectListPreference
+            android:entries="@array/my_library_tabs_desc"
+            android:entryValues="@array/my_library_tabs"
+            android:key="my_library_hidden_tabs"
+            android:title="@string/my_library_hidden_tabs" />
+        <CustomSwitchPreference
+            android:key="album_grid_three_columns"
+            android:title="@string/album_grid_three_columns" />
         <CustomSwitchPreference
             android:key="universal_art_replacer"
             android:summary="@string/universal_art_replacer_summary"
