@@ -373,7 +373,6 @@ public class NowPlaying {
                 @Override
                 public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
                     PREFS.reload();
-                    log("Hooking artpage");
                     if (PREFS.getBoolean(Common.NP_HIDE_YT_ICONS, false)) {
                         RelativeLayout root = (RelativeLayout) lIParam.view;
                         log(root.toString());
