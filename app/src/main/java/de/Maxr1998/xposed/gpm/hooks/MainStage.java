@@ -1,5 +1,7 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.content.Context;
+
 import java.lang.reflect.Field;
 
 import de.Maxr1998.xposed.gpm.Common;
@@ -18,11 +20,15 @@ public class MainStage {
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
             // Change default pane
-            if (PREFS.getBoolean(Common.DEFAULT_MY_LIBRARY, false)) {
-                Field defaultScreen = findClass(GPM + ".ui.HomeActivity", lPParam.classLoader).getDeclaredField("DEFAULT_SCREEN");
-                defaultScreen.setAccessible(true);
-                defaultScreen.set(null, XposedHelpers.getStaticObjectField(findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader), "MY_LIBRARY"));
-            }
+            findAndHookMethod(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader, "getDefaultScreen", Context.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getBoolean(Common.DEFAULT_MY_LIBRARY, false)) {
+                        param.setResult(XposedHelpers.getStaticObjectField(findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader), "MY_LIBRARY"));
+                    }
+                }
+            });
 
             // Remove "Play Music for…"
             findAndHookMethod(GPM + ".ui.MaterialMainstageFragment.RecyclerAdapter", lPParam.classLoader, "showSituationCard", new XC_MethodHook() {
