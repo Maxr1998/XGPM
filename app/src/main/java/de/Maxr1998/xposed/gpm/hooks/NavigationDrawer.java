@@ -22,20 +22,22 @@ import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.setIntField;
+import static de.robv.android.xposed.XposedHelpers.setStaticObjectField;
 
 public class NavigationDrawer {
 
     @SuppressWarnings("unchecked")
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
-            // Enable new adaptive home | Disabled until URL gets added
-            /*findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isAdaptiveHomeEnabled", Context.class, new XC_MethodReplacement() {
+            // Enable new adaptive home
+            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isAdaptiveHomeEnabled", Context.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                    return true;
+                    PREFS.reload();
+                    return PREFS.getBoolean(Common.DRAWER_ENABLE_ADAPTIVE_HOME , false);
                 }
             });
-            setStaticObjectField(findClass(GPM + ".sync.api.MusicUrl", lPParam.classLoader), "MUSIC_PA_URL_HOST", "https://mclients.googleapis.com/");*/
+            setStaticObjectField(findClass(GPM + ".sync.api.MusicUrl", lPParam.classLoader), "MUSIC_PA_URL_HOST", "https://mclients.googleapis.com/music");
 
             // Constant classes
             final Class screenClass = findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader);

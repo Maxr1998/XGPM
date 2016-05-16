@@ -27,6 +27,10 @@
         <CustomSwitchPreference
             android:key="drawer_hide_unlimited"
             android:title="@string/drawer_hide_unlimited" />
+        <CustomSwitchPreference
+            android:key="drawer_enable_adaptive_home"
+            android:summary="@string/drawer_enable_adaptive_home_summary"
+            android:title="@string/drawer_enable_adaptive_home" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_now_playing">
         <CustomSwitchPreference

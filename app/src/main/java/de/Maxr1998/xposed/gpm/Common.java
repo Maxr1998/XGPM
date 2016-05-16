@@ -14,6 +14,7 @@ public final class Common {
     //
     public static final String NAV_DRAWER_HIDDEN_ITEMS = "nav_drawer_hidden_items";
     public static final String DRAWER_HIDE_UNLIMITED = "drawer_hide_unlimited";
+    public static final String DRAWER_ENABLE_ADAPTIVE_HOME = "drawer_enable_adaptive_home";
     //
     public static final String NP_NEW_DESIGN = "np_new_design";
     public static final String NP_TINT_ICONS = "np_tint_icons";

@@ -28,6 +28,10 @@
         <item>Help &amp; Feedback</item>
     </string-array>
     <string name="drawer_hide_unlimited">Hide subscription shortcut</string>
+    <string name="drawer_enable_adaptive_home">Enable Adaptive home [EXPERIMENTAL]</string>
+    <string name="drawer_enable_adaptive_home_summary">Adaptive home, codenamed \"Innerjam\", is a new homescreen currently developed by Google,
+        which will show recommendations, playlists and concerts near you. At the moment, the feature is missing the Google API URL, so it will only show a blank screen,
+        but it is likely that Google will enable it with a server side switch.</string>
 
     <string name="category_now_playing">Now playing screen</string>
     <string name="np_new_design">New design</string>
