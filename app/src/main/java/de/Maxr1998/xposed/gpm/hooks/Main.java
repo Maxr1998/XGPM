@@ -1,5 +1,6 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 
@@ -8,6 +9,7 @@ import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.IXposedHookInitPackageResources;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
+import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources;
@@ -31,42 +33,55 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
     }
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
+    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
         if (lPParam.packageName.equals(GPM)) {
-            PREFS.reload();
-            // UI
-            MainStage.init(lPParam);
-            MyLibrary.init(lPParam);
-            NavigationDrawer.init(lPParam);
-            NowPlaying.init(lPParam);
-            TrackList.init(lPParam);
-
-            // External
-            ArtReplacer.init(lPParam);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                NotificationMod.init(lPParam);
+                doHooks(lPParam);
+            } else {
+                findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+                        doHooks(lPParam);
+                    }
+                });
             }
+        }
+    }
 
-            // Enable voice control
-            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isSnappleEnabled", Context.class, new XC_MethodReplacement() {
-                @Override
-                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                    return true;
-                }
-            });
+    private void doHooks(XC_LoadPackage.LoadPackageParam lPParam) {
+        PREFS.reload();
+        // UI
+        MainStage.init(lPParam);
+        MyLibrary.init(lPParam);
+        NavigationDrawer.init(lPParam);
+        NowPlaying.init(lPParam);
+        TrackList.init(lPParam);
 
-            // Debug
-            if (BuildConfig.DEBUG) {
-                try {
-                    findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), new XC_MethodReplacement() {
-                        @Override
-                        protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
-                            return true;
-                        }
-                    });
-                } catch (Throwable t) {
-                    log(t);
-                }
+        // External
+        ArtReplacer.init(lPParam);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            NotificationMod.init(lPParam);
+        }
+
+        // Enable voice control
+        findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isSnappleEnabled", Context.class, new XC_MethodReplacement() {
+            @Override
+            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                return true;
+            }
+        });
+
+        // Debug
+        if (BuildConfig.DEBUG) {
+            try {
+                findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), new XC_MethodReplacement() {
+                    @Override
+                    protected Object replaceHookedMethod(MethodHookParam methodHookParam) throws Throwable {
+                        return true;
+                    }
+                });
+            } catch (Throwable t) {
+                log(t);
             }
         }
     }
