@@ -375,7 +375,6 @@ public class NowPlaying {
                     PREFS.reload();
                     if (PREFS.getBoolean(Common.NP_HIDE_YT_ICONS, false)) {
                         RelativeLayout root = (RelativeLayout) lIParam.view;
-                        log(root.toString());
                         FrameLayout backup = new FrameLayout(root.getContext());
                         backup.addView(disconnect(root.findViewById(root.getResources().getIdentifier("youtube_overlay", "id", GPM))));
                         backup.addView(disconnect(root.findViewById(root.getResources().getIdentifier("youtube_play_red", "id", GPM))));
