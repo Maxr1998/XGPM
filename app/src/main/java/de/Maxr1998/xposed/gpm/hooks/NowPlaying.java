@@ -25,6 +25,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -101,7 +103,6 @@ public class NowPlaying {
             findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "updateQueueSwitcherState", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.NP_TINT_ICONS, false) && !isNewDesignEnabled()) {
                         tintQueueButton(param.thisObject);
                     }
@@ -114,7 +115,38 @@ public class NowPlaying {
                 protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                     View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
                     ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID).setVisibility(queueSwitcher.getVisibility());
+                    PREFS.reload();
                     updateTint(param.thisObject);
+                }
+            });
+
+            findAndHookMethod(NOW_PLAYING_FRAGMENT + "$NowPlayingHeaderPageAdapter", lPParam.classLoader, "onPageScrollStateChanged", int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    if (isNewDesignEnabled()) {
+                        param.setResult(null);
+                    }
+                }
+            });
+
+            findAndHookMethod(NOW_PLAYING_FRAGMENT + "$NowPlayingHeaderPageAdapter", lPParam.classLoader, "onPageScrolled", int.class, float.class, int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    if (isNewDesignEnabled()) {
+                        log("Pager state " + param.args[0] + " " + param.args[1]);
+                        View customPlaybackOptionsBar = ((View) getObjectField(getObjectField(param.thisObject, "this$0"), "mRootView"))
+                                .findViewById(modRes.getIdentifier("playback_options_bar", "id", XGPM));
+                        float offset = (float) param.args[1];
+                        boolean hide = offset > 0.01f && offset < 0.99f;
+                        if ((customPlaybackOptionsBar.getVisibility() == View.VISIBLE && hide) || (customPlaybackOptionsBar.getVisibility() == View.INVISIBLE && !hide)) {
+                            customPlaybackOptionsBar.clearAnimation();
+                            customPlaybackOptionsBar.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+                            Animation animation = new AlphaAnimation(hide ? 1f : 0f, hide ? 0f : 1f);
+                            animation.setDuration(100);
+                            customPlaybackOptionsBar.startAnimation(animation);
+                        }
+                        param.setResult(null);
+                    }
                 }
             });
 
@@ -399,7 +431,6 @@ public class NowPlaying {
     }
 
     private static void updateTint(final Object nowPlayingFragment) {
-        PREFS.reload();
         if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
             ViewGroup root = (ViewGroup) getObjectField(nowPlayingFragment, "mRootView");
             Object currentState = getObjectField(nowPlayingFragment, "mCurrentState");
