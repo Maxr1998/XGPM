@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
             switch (preference.getKey()) {
-                case Common.DEFAULT_MY_LIBRARY:
                 case Common.UNIVERSAL_ART_REPLACER:
                 case Common.NP_REMOVE_DROP_SHADOW:
                     Snackbar.make(getActivity().findViewById(R.id.preference_frame), R.string.force_stop_required, Snackbar.LENGTH_LONG)
