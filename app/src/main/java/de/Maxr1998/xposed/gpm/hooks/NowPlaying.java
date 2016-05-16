@@ -113,9 +113,12 @@ public class NowPlaying {
             findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "onExpandingStateChanged", EXPANDING_SCROLL_VIEW, EXPANDING_STATE, EXPANDING_STATE, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+                    PREFS.reload();
                     View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
                     ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID).setVisibility(queueSwitcher.getVisibility());
-                    PREFS.reload();
+                    if (isNewDesignEnabled()) {
+                        ((View) getObjectField(param.thisObject, "mMediaRouteButton")).setVisibility(queueSwitcher.getVisibility());
+                    }
                     updateTint(param.thisObject);
                 }
             });
