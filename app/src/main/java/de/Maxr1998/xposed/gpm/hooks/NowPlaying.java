@@ -316,6 +316,7 @@ public class NowPlaying {
                         customProgressBar.addView(totalTime);
 
                         customTitleBar.addView(disconnect(headerPager), 0);
+                        ((RelativeLayout.LayoutParams) headerPager.getLayoutParams()).addRule(RelativeLayout.CENTER_VERTICAL);
                         headerPager.setBackgroundColor(0);
 
                         customPlaybackOptionsBar.addView(disconnect(repeat), WRAP_CONTENT, MATCH_PARENT);
