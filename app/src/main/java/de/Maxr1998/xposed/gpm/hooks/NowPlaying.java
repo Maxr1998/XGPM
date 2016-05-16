@@ -2,7 +2,6 @@ package de.Maxr1998.xposed.gpm.hooks;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.MediaRouteButton;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.content.res.XModuleResources;
@@ -134,7 +133,6 @@ public class NowPlaying {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     if (isNewDesignEnabled()) {
-                        log("Pager state " + param.args[0] + " " + param.args[1]);
                         View customPlaybackOptionsBar = ((View) getObjectField(getObjectField(param.thisObject, "this$0"), "mRootView"))
                                 .findViewById(modRes.getIdentifier("playback_options_bar", "id", XGPM));
                         float offset = (float) param.args[1];
@@ -272,18 +270,6 @@ public class NowPlaying {
                         eqButton.setVisibility(queueSwitcher.getVisibility());
                     }
 
-                    // Touch feedback
-                    @SuppressLint("InlinedApi") TypedArray a = nowPlayingLayout.getContext().obtainStyledAttributes(new int[]{android.R.attr.selectableItemBackgroundBorderless});
-                    for (int i = 0; i < topWrapperRight.getChildCount(); i++) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                            topWrapperRight.getChildAt(i).setBackground(a.getDrawable(0));
-                        } else {
-                            //noinspection deprecation
-                            topWrapperRight.getChildAt(i).setBackgroundDrawable(a.getDrawable(0));
-                        }
-                    }
-                    a.recycle();
-
                     // New design
                     if (isNewDesignEnabled()) {
                         final RelativeLayout customLayout = (RelativeLayout) LayoutInflater.from(nowPlayingLayout.getContext())
@@ -312,9 +298,13 @@ public class NowPlaying {
                         customHeaderBar.addView(disconnect(topWrapperRight));
 
                         View mediaRoutePicker = nowPlayingLayout.findViewById(mediaRoutePickerId);
-                        topWrapperRight.addView(disconnect(mediaRoutePicker), 0);
+                        mediaRoutePicker.setMinimumWidth(0);
+                        mediaRoutePicker.setMinimumHeight(0);
+                        topWrapperRight.addView(disconnect(mediaRoutePicker), 0, new RelativeLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT));
                         View voiceControl = topWrapperRight.findViewById(voiceControlId);
                         ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).addRule(RelativeLayout.RIGHT_OF, mediaRoutePickerId);
+                        int voiceMargin = ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).leftMargin;
+                        ((RelativeLayout.LayoutParams) mediaRoutePicker.getLayoutParams()).setMargins(voiceMargin, 0, -voiceMargin, 0);
 
                         LinearLayout.LayoutParams customArtPagerLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, 0);
                         customMainContainer.addView(disconnect(artPager), 0, customArtPagerLayoutParams);
@@ -384,6 +374,18 @@ public class NowPlaying {
                             }
                         }
                     }
+
+                    // Touch feedback
+                    @SuppressLint("InlinedApi") TypedArray a = nowPlayingLayout.getContext().obtainStyledAttributes(new int[]{android.R.attr.selectableItemBackgroundBorderless});
+                    for (int i = 0; i < topWrapperRight.getChildCount(); i++) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                            topWrapperRight.getChildAt(i).setBackground(a.getDrawable(0));
+                        } else {
+                            //noinspection deprecation
+                            topWrapperRight.getChildAt(i).setBackgroundDrawable(a.getDrawable(0));
+                        }
+                    }
+                    a.recycle();
                 }
             });
 
@@ -474,7 +476,7 @@ public class NowPlaying {
                         View current = wrapper.getChildAt(j);
                         if (current instanceof ImageView && current.getId() != root.getResources().getIdentifier("play_pause_header", "id", GPM)) {
                             ((ImageView) current).setColorFilter(imageColor);
-                        } else if (current instanceof MediaRouteButton) {
+                        } else if (current.getClass().getSimpleName().equals("MediaRouteButton")) {
                             ((Drawable) getObjectField(current, "mRemoteIndicator")).setColorFilter(imageColor, PorterDuff.Mode.SRC_ATOP);
                         }
                     }
