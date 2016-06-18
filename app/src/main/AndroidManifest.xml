@@ -35,7 +35,8 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="Tweak the layout of Google Play Music" />
+            android:value="@string/xposed_description"
+            tools:ignore="ManifestResource" />
         <meta-data
             android:name="xposedminversion"
             android:value="42" />
