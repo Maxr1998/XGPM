@@ -67,7 +67,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
         findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isSnappleEnabled", Context.class, new XC_MethodReplacement() {
             @Override
             protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                return true;
+                return PREFS.getBoolean(Common.NP_VOICE_CONTROL, false);
             }
         });
 
