@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">XGPM</string>
+    <string name="app_name" translatable="false">XGPM</string>
 
     <string name="force_stop_required">Force stop of GPM required to apply</string>
     <string name="action_show_app_details">App-Details</string>
@@ -62,4 +62,9 @@
     <string name="hide_from_launcher">Hide XGPM from launcher</string>
 
     <string name="donate">Donate to the developer</string>
+    <string name="np_voice_control">Add Voice Commands</string>
+    <string name="np_voice_control_summary">Add voice commands shortcut next to the queue button\nNote: Overwritten by equalizer shortcut</string>
+    <string name="np_no_album_art">No Album Arts in Track Selector</string>
+    <string name="np_no_album_art_summary">Loading album arts require some time, so you can disable it here.\nThe list is also limited to 40 songs.</string>
+    <string name="xposed_description">Tweak the layout of Google Play Music</string>
 </resources>
