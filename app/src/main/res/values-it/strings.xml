@@ -55,7 +55,7 @@
     <string name="np_hide_yt_icons">Nascondi tutte le icone relative a YouTube</string>
 
     <string name="category_notification">Notifiche</string>
-    <string name="notification_narrow">Usa il vecchi design</string>
+    <string name="notification_narrow">Usa il vecchio design</string>
     <string name="notification_narrow_summary">Rimuovi i pollici e mostra la cover in grande\nNB. Lollipop e superiori</string>
 
     <string name="category_xgpm">XGPM</string>
