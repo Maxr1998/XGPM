@@ -115,7 +115,9 @@ public class NowPlaying {
                 protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                     PREFS.reload();
                     View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
-                    ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID).setVisibility(queueSwitcher.getVisibility());
+                    View EQ_BUTTON_ID_TMP = ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID);
+                    if(EQ_BUTTON_ID_TMP!=null)
+                        EQ_BUTTON_ID_TMP.setVisibility(queueSwitcher.getVisibility());
                     if (isNewDesignEnabled()) {
                         ((View) getObjectField(param.thisObject, "mMediaRouteButton")).setVisibility(queueSwitcher.getVisibility());
                     }
