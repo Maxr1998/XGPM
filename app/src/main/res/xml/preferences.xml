@@ -57,6 +57,10 @@
             android:key="np_remove_drop_shadow"
             android:title="@string/np_remove_drop_shadow" />
         <CustomSwitchPreference
+            android:key="np_voice_control"
+            android:summary="@string/np_voice_control_summary"
+            android:title="@string/np_voice_control" />
+        <CustomSwitchPreference
             android:key="np_add_eq"
             android:summary="@string/np_add_eq_summary"
             android:title="@string/np_add_eq" />
@@ -69,6 +73,10 @@
             android:key="notification_narrow"
             android:summary="@string/notification_narrow_summary"
             android:title="@string/notification_narrow" />
+        <CustomSwitchPreference
+            android:key="np_no_album_art"
+            android:summary="@string/np_no_album_art"
+            android:title="@string/np_no_album_art" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_xgpm">
         <CustomSwitchPreference
