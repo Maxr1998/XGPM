@@ -8,7 +8,7 @@
     <string name="default_my_library">Mostra \"La mia Libreria\" come schermata di default</string>
     <string name="remove_situations">Rimuovi \"Riproduci Musica per…\"</string>
     <string name="remove_recommendations">Rimuovi suggerimenti</string>
-    <string name="my_library_hidden_tabs">Nascondi i tab in \"La mia Libreria\"</string>
+    <string name="my_library_hidden_tabs">Nascondi tab in \"La mia Libreria\"</string>
     <string-array name="my_library_tabs_desc">
         <item>Playlist</item>
         <item>Radio</item>
@@ -37,7 +37,7 @@
         <item>Guida e feedback</item>
     </string-array>
     <string name="drawer_hide_unlimited">Nascondi il link di abbonamento</string>
-    <string name="drawer_enable_adaptive_home">Abilita Home adattiva [EXPERIMENTAL]</string>
+    <string name="drawer_enable_adaptive_home">Abilita Home adattiva [SPERIMENTALE]</string>
     <string name="drawer_enable_adaptive_home_summary">La home adattiva, chiamata \"Innerjam\", è una nuova home sviluppata da Google
         che mostra suggerimenti, playlist e conscerti vicino a te. Al momento la funzione non è attiva sul servere mostra una schermata vuota,
         ma è possibile che Google la abiliti.</string>
@@ -48,7 +48,7 @@
     <string name="np_tint_icons">Colora le icone secondo la cover dell\'album</string>
     <string name="np_tint_icons_summary">NB. In caso di problemi chiudi e riapri GPM</string>
     <string name="np_resize_covers">Ridimensiona le cover</string>
-    <string name="np_resize_covers_summary">rendi la cover visibile a tuto schermo senza nasconderla sotto i controlli</string>
+    <string name="np_resize_covers_summary">Rendi la cover visibile a tuto schermo senza nasconderla sotto i controlli</string>
     <string name="np_remove_drop_shadow">Rimuovi l\'ombra sopra la cover</string>
     <string name="np_add_eq">Aggiungi link all\'equalizzatore</string>
     <string name="np_add_eq_summary">Aggiungi un link all\'equalizzatore nella schermata di riproduzione</string>
@@ -64,8 +64,9 @@
     <string name="donate">Donami!</string>
 
     <string name="np_voice_control">Aggiungi comandi vocali</string>
-    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione\NB. Sovrascritto dal link all\'equalizzatore</string>
+    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione\nNB. Sovrascritto dal link all\'equalizzatore</string>
     <string name="np_no_album_art">Nessuna cover nel selettore di tracce</string>
     <string name="np_no_album_art_summary">Il caricamento delle cover richiede qualche tempo, perciò puoi disabilitarlo.\nInoltre la lista è limitata a 40 canzoni.</string>
     <string name="xposed_description">Varie modifiche per Google Play Music</string>
+    <string name="open_GPM">Apri GPM</string>
 </resources>
