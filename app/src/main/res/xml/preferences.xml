@@ -75,7 +75,7 @@
             android:title="@string/notification_narrow" />
         <CustomSwitchPreference
             android:key="np_no_album_art"
-            android:summary="@string/np_no_album_art"
+            android:summary="@string/np_no_album_art_summary"
             android:title="@string/np_no_album_art" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_xgpm">
