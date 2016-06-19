@@ -12,7 +12,7 @@ android {
         targetSdkVersion 23
         versionCode 24
         versionName "1.9.1"
-        resConfigs "en"
+        resConfigs "en", "it"
         vectorDrawables {
             generatedDensities = ["hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
         }
