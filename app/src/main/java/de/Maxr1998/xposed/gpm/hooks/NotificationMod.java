@@ -49,6 +49,7 @@ public class NotificationMod {
     private static ArrayList<Bundle> TRACKS_COMPAT_TEMP = new ArrayList<>();
     private static Bitmap grayBitmap = null;
     private final static int limit = 40;
+    private static int playing = 0;
 
     public static Uri getMediaStoreAlbumArt(long n) {
         return Uri.parse("content://media/external/audio/albumart/" + n);
@@ -102,7 +103,7 @@ public class NotificationMod {
                     Context mContext = (Context) param.thisObject;
                     Notification mNotification = (Notification) param.getResult();
                     if (NotificationHelper.isSupported(mNotification))
-                        NotificationHelper.insertToNotification(mNotification, TRACKS_COMPAT_TEMP, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
+                        NotificationHelper.insertToNotification(mNotification, TRACKS_COMPAT_TEMP, mContext, playing);
                 }
             });
             // Initialize data loader
@@ -131,12 +132,17 @@ public class NotificationMod {
                                 Set<Long> ids = new HashSet<>();
                                 PREFS.reload();
                                 boolean noArt = PREFS.getBoolean(Common.NP_NO_ALBUM_ART, false);
+                                playing = getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos");
                                 do {
-                                    if(i>limit && !noArt)
-                                        break;
+                                    if (!noArt) {
+                                        if (cursor.getPosition() < playing)
+                                            continue;
+                                        if (i > limit)
+                                            break;
+                                    }
                                     long trackID = cursor.getLong(1);
                                     Bundle preTrack = TRACKS_COMPAT.get(trackID);
-                                    if(preTrack!=null) {
+                                    if (preTrack != null) {
                                         i++;
                                         TRACKS_COMPAT_TEMP.add(preTrack);
                                         continue;
@@ -148,7 +154,7 @@ public class NotificationMod {
                                                 .setArtist(cursor.getString(2))
                                                 .setDuration(callStaticMethod(findClass(GPM + ".utils.StringUtils", lPParam.classLoader),
                                                         "makeTimeString", mService, cursor.getInt(3)).toString());
-                                        if(!noArt) {
+                                        if (!noArt) {
                                             long res = Long.parseLong(cursor.getString(4).substring("mediastore:".length()));
                                             Bitmap bitmap = bitmaps.get(res);
                                             if (bitmap != null)
@@ -166,8 +172,7 @@ public class NotificationMod {
                                                 bitmaps.put(res, bitmap);
                                                 track.setArt(bitmap);
                                             }
-                                        }
-                                        else
+                                        } else
                                             track.setArt(grayBitmap);
                                         ids.add(track.id);
                                         preTrack = track.get();
@@ -177,6 +182,8 @@ public class NotificationMod {
                                     }
                                 } while (cursor.moveToNext());
                                 cursor.close();
+                                if (!noArt)
+                                    playing = 0;
                             } catch (Throwable t) {
                                 log(t);
                             }
