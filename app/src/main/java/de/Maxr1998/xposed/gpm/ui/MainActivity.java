@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add("Open GPM")
+        menu.add(getString(R.string.open_GPM))
                 .setIcon(R.drawable.ic_album_white_24dp)
                 .setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS)
                 .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
