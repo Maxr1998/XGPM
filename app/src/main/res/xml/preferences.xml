@@ -74,6 +74,12 @@
             android:summary="@string/notification_narrow_summary"
             android:title="@string/notification_narrow" />
         <CustomSwitchPreference
+            android:disableDependentsState="true"
+            android:key="np_alternative_art_loader"
+            android:summary="@string/np_alternative_art_loader_summary"
+            android:title="@string/np_alternative_art_loader" />
+        <CustomSwitchPreference
+            android:dependency="np_alternative_art_loader"
             android:key="np_no_album_art"
             android:summary="@string/np_no_album_art_summary"
             android:title="@string/np_no_album_art" />
