@@ -25,6 +25,7 @@ public final class Common {
     public static final String NP_HIDE_YT_ICONS = "np_hide_yt_icons";
     public static final String NP_VOICE_CONTROL = "np_voice_control";
     public static final String NP_NO_ALBUM_ART = "np_no_album_art";
+    public static final String NP_ALTERNATIVE_ART_LOADER = "np_alternative_art_loader";
 
     //
     public static final String NOTIFICATION_NARROW = "notification_narrow";
