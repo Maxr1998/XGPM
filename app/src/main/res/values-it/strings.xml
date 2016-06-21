@@ -69,4 +69,6 @@
     <string name="np_no_album_art_summary">Il caricamento delle cover richiede qualche tempo, perciò puoi disabilitarlo.\nInoltre la lista è limitata a 40 canzoni.</string>
     <string name="xposed_description">Varie modifiche per Google Play Music</string>
     <string name="open_GPM">Apri GPM</string>
+    <string name="np_alternative_art_loader">Caricamento Cover Alternativo</string>
+    <string name="np_alternative_art_loader_summary">Se normalmente non vedi le cover nel selettore di tracce, puoi provare questo.</string>
 </resources>
