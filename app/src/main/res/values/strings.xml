@@ -68,4 +68,6 @@
     <string name="np_no_album_art_summary">Loading album arts require some time, so you can disable it here.\nThe list is also limited to 40 songs.</string>
     <string name="xposed_description">Tweak the layout of Google Play Music</string>
     <string name="open_GPM">Open GPM</string>
+    <string name="np_alternative_art_loader">Alternative Art Loader</string>
+    <string name="np_alternative_art_loader_summary">If normally you can\'t see album arts in the track selector, you can try this.</string>
 </resources>
