@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="force_stop_required">Termina GPM per applicare le modifiche</string>
+    <string name="action_show_app_details">Dettagli App</string>
+
+    <string name="category_main">Generali</string>
+    <string name="default_my_library">Mostra \"La mia Libreria\" come schermata di default</string>
+    <string name="remove_situations">Rimuovi \"Riproduci Musica per…\"</string>
+    <string name="remove_recommendations">Rimuovi suggerimenti</string>
+    <string name="my_library_hidden_tabs">Nascondi tab in \"La mia Libreria\"</string>
+    <string-array name="my_library_tabs_desc">
+        <item>Playlist</item>
+        <item>Radio</item>
+        <item>Artisti</item>
+        <item>Album</item>
+        <item>Canzoni</item>
+        <item>Generi</item>
+    </string-array>
+    <string name="album_grid_three_columns">Mostra tre colonne nella griglia degli Album</string>
+    <string name="universal_art_replacer">Abilita l\'Universal Art Replacer</string>
+    <string name="universal_art_replacer_summary">Aggiunge la possibiltà di rimpiazzare qualsiasi cover in GPM.
+        Devi creare un\'immagine con gli stessi identici nomi &amp; dimensioni come in
+        <i>/data/data/com.google.android.music/files/artwork/</i> nella cartella <i>ArtCacheOverlay</i> sulla tua SD.</string>
+
+    <string name="category_drawer">Drawer</string>
+    <string name="nav_drawer_hide_items">Nascondi elementi del drawer</string>
+    <string-array name="nav_drawer_items_desc">
+        <item>Classifiche</item>
+        <item>Nuove uscite</item>
+        <item>Playlist</item>
+        <item>Podcast</item>
+        <item>Radio</item>
+        <item>Solo scaricate</item>
+        <item>Acquista</item>
+        <item>Invia regalo</item>
+        <item>Guida e feedback</item>
+    </string-array>
+    <string name="drawer_hide_unlimited">Nascondi il link di abbonamento</string>
+    <string name="drawer_enable_adaptive_home">Abilita Home adattiva [SPERIMENTALE]</string>
+    <string name="drawer_enable_adaptive_home_summary">La home adattiva, chiamata \"Innerjam\", è una nuova home sviluppata da Google
+        che mostra suggerimenti, playlist e conscerti vicino a te. Al momento la funzione non è attiva sul servere mostra una schermata vuota,
+        ma è possibile che Google la abiliti.</string>
+
+    <string name="category_now_playing">Schermata di riproduzione</string>
+    <string name="np_new_design">Nuovo Design</string>
+    <string name="np_new_design_summary">Abilita il nuovo design creato da me!</string>
+    <string name="np_tint_icons">Colora le icone secondo la cover dell\'album</string>
+    <string name="np_tint_icons_summary">NB. In caso di problemi chiudi e riapri GPM</string>
+    <string name="np_resize_covers">Ridimensiona le cover</string>
+    <string name="np_resize_covers_summary">Rendi la cover visibile a tuto schermo senza nasconderla sotto i controlli</string>
+    <string name="np_remove_drop_shadow">Rimuovi l\'ombra sopra la cover</string>
+    <string name="np_add_eq">Aggiungi link all\'equalizzatore</string>
+    <string name="np_add_eq_summary">Aggiungi un link all\'equalizzatore nella schermata di riproduzione</string>
+    <string name="np_hide_yt_icons">Nascondi tutte le icone relative a YouTube</string>
+
+    <string name="category_notification">Notifiche</string>
+    <string name="notification_narrow">Usa il vecchio design</string>
+    <string name="notification_narrow_summary">Rimuovi i pollici e mostra la cover in grande\nNB. Lollipop e superiori</string>
+
+    <string name="category_xgpm">XGPM</string>
+    <string name="hide_from_launcher">Nascondi XGPM dal launcher</string>
+
+    <string name="donate">Donami!</string>
+
+    <string name="np_voice_control">Aggiungi comandi vocali</string>
+    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione\nNB. Sovrascritto dal link all\'equalizzatore</string>
+    <string name="np_no_album_art">Nessuna cover nel selettore di tracce</string>
+    <string name="np_no_album_art_summary">Il caricamento delle cover richiede qualche tempo, perciò puoi disabilitarlo.\nInoltre la lista è limitata a 40 canzoni.</string>
+    <string name="xposed_description">Varie modifiche per Google Play Music</string>
+    <string name="open_GPM">Apri GPM</string>
+    <string name="np_alternative_art_loader">Caricamento Cover Alternativo</string>
+    <string name="np_alternative_art_loader_summary">Se normalmente non vedi le cover nel selettore di tracce, puoi provare questo.</string>
+</resources>
