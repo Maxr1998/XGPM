@@ -4,12 +4,12 @@ android {
     signingConfigs {
         main
     }
-    compileSdkVersion 23
-    buildToolsVersion '24.0.0 rc2'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.0'
     defaultConfig {
         applicationId "de.Maxr1998.xposed.gpm"
         minSdkVersion 15
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 24
         versionName "1.9.1"
         resConfigs "en", "it"
@@ -53,9 +53,9 @@ repositories {
     jcenter()
 }
 dependencies {
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
-    compile 'com.android.support:palette-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.android.support:design:24.0.0'
+    compile 'com.android.support:palette-v7:24.0.0'
     compile 'de.Maxr1998:track-selector-lib:1.1'
     provided 'de.robv.android.xposed:api:81'
     provided 'de.robv.android.xposed:api:81:sources'
