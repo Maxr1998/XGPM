@@ -15,13 +15,13 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.util.ArrayMap;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,40 +45,16 @@ import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.getStaticObjectField;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-public class NotificationMod {
+class NotificationMod {
 
     private static Runnable META_DATA_RELOADER;
     private static Object ART_LOADER_COMPLETION_LISTENER;
-    private static ArrayMap<Long, Bundle> TRACKS_COMPAT = new ArrayMap<>();
-    private static ArrayList<Bundle> TRACKS_COMPAT_TEMP = new ArrayList<>();
-    private static ArrayList<TrackItem> TRACKS_COMPAT_ST = new ArrayList<>();
-    private static ArrayMap<Long, Bitmap> bitmaps = new ArrayMap<>();
-    private static Bitmap grayBitmap = null;
-    private final static int limit = 40;
-    private final static int upperlimit = 10;
-    private static int playing = 0;
+    private static LinkedHashMap<Long, TrackItem> TRACK_ITEMS_CACHE = new LinkedHashMap<>();
+    private static ArrayList<TrackItem> TRACK_ITEMS = new ArrayList<>();
+    private static Bitmap GRAY_BITMAP;
 
-    public static Uri getMediaStoreAlbumArt(long n) {
-        return Uri.parse("content://media/external/audio/albumart/" + n);
-    }
-
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-        if (height > reqHeight || width > reqWidth) {
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both height and width larger than the
-            // requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth)
-                inSampleSize *= 2;
-        }
-        return inSampleSize;
-    }
-
-    public static Bitmap decodeSampledBitmapFromFile(String pathName, int reqWidth, int reqHeight) {
+    @SuppressWarnings("deprecation")
+    private static Bitmap decodeSampledBitmapFromFile(String pathName, int size) {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -88,18 +64,32 @@ public class NotificationMod {
         BitmapFactory.decodeFile(pathName, options);
 
         // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+        options.inSampleSize = calculateInSampleSize(options, size);
 
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
         return BitmapFactory.decodeFile(pathName, options);
     }
 
+    private static int calculateInSampleSize(BitmapFactory.Options options, int size) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+        if (height > size && width > size) {
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both height and width larger than the
+            // requested height and width.
+            while ((height / inSampleSize * 2) > size && (width / inSampleSize * 2) > size)
+                inSampleSize *= 2;
+        }
+        return inSampleSize;
+    }
+
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
             //Create gray bitmap
-            grayBitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565);
-            grayBitmap.eraseColor(Color.LTGRAY);
+            GRAY_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565);
+            GRAY_BITMAP.eraseColor(Color.LTGRAY);
             // TRACK SELECTION
             // Edit notification
             findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "buildLNotification", new XC_MethodHook() {
@@ -108,18 +98,12 @@ public class NotificationMod {
                     Context mContext = (Context) param.thisObject;
                     Notification mNotification = (Notification) param.getResult();
                     PREFS.reload();
-                    boolean alternativeMode = PREFS.getBoolean(Common.NP_ALTERNATIVE_ART_LOADER, false);
                     if (NotificationHelper.isSupported(mNotification)) {
                         ArrayList<Bundle> tracks = new ArrayList<>();
-                        if (alternativeMode)
-                            tracks = TRACKS_COMPAT_TEMP;
-                        else {
-                            for (int i = 0; i < TRACKS_COMPAT_ST.size(); i++)
-                                tracks.add(TRACKS_COMPAT_ST.get(i).get());
-                            TRACKS_COMPAT_ST.clear();
-
-                        }
-                        NotificationHelper.insertToNotification(mNotification, tracks, mContext, playing);
+                        for (int i = 0; i < TRACK_ITEMS.size(); i++)
+                            tracks.add(TRACK_ITEMS.get(i).get());
+                        TRACK_ITEMS.clear();
+                        NotificationHelper.insertToNotification(mNotification, tracks, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
                     }
                 }
             });
@@ -138,123 +122,82 @@ public class NotificationMod {
                                 if (mSongList == null)
                                     return;
                                 PREFS.reload();
-                                boolean alternativeMode = PREFS.getBoolean(Common.NP_ALTERNATIVE_ART_LOADER, false);
-                                boolean noArt = PREFS.getBoolean(Common.NP_NO_ALBUM_ART, false);
 
-                                if (alternativeMode) {
-                                    Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class},
-                                            mService, new String[]{"title", "SongId", "artist", "duration", "AlbumArtLocation"});
-                                    cursor.moveToPosition(0);
-                                    //Initialize vars
-                                    TRACKS_COMPAT_TEMP = new ArrayList<>();
-                                    bitmaps = new ArrayMap<>();
-                                    int i = 0;
-                                    // Loading data
-                                    ContentResolver cr = mService.getContentResolver();
-                                    Set<Long> ids = new HashSet<>();
-                                    playing = getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos");
-                                    do {
-                                        if (!noArt) {
-                                            if (cursor.getPosition() < (playing - upperlimit))
-                                                continue;
-                                            if (i > limit)
-                                                break;
-                                        }
-                                        long trackID = cursor.getLong(1);
-                                        Bundle preTrack = TRACKS_COMPAT.get(trackID);
-                                        if (preTrack != null) {
-                                            i++;
-                                            TRACKS_COMPAT_TEMP.add(preTrack);
-                                            continue;
-                                        }
-                                        TrackItem track = new TrackItem();
-                                        track.id = trackID;
-                                        if (!ids.contains(track.id)) {
-                                            track.setTitle(cursor.getString(0))
-                                                    .setArtist(cursor.getString(2))
-                                                    .setDuration(callStaticMethod(findClass(GPM + ".utils.StringUtils", lPParam.classLoader),
-                                                            "makeTimeString", mService, cursor.getInt(3)).toString());
-                                            if (!noArt) {
-                                                long res = Long.parseLong(cursor.getString(4).substring("mediastore:".length()));
-                                                Bitmap bitmap = bitmaps.get(res);
-                                                if (bitmap != null)
-                                                    track.setArt(bitmap);
-                                                else {
-                                                    Uri uri = getMediaStoreAlbumArt(res);
-                                                    Cursor cur = cr.query(uri, new String[]{"_data"}, null, null, null);
-                                                    if (cur != null) {
-                                                        cur.moveToFirst();
-                                                        bitmap = decodeSampledBitmapFromFile(cur.getString(0), 64, 64);
-                                                        cur.close();
-                                                    }
-                                                    if (bitmap == null)
-                                                        bitmap = grayBitmap;
-                                                    bitmaps.put(res, bitmap);
-                                                    track.setArt(bitmap);
-                                                }
-                                            } else
-                                                track.setArt(grayBitmap);
-                                            ids.add(track.id);
-                                            preTrack = track.get();
-                                            TRACKS_COMPAT.put(trackID, preTrack);
-                                            TRACKS_COMPAT_TEMP.add(preTrack);
-                                            i++;
-                                        }
-                                    } while (cursor.moveToNext());
-                                    cursor.close();
-                                    if (!noArt)
-                                        if(playing > upperlimit)
-                                            playing = upperlimit;
-                                } else {
-                                    Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class},
-                                            mService, new String[]{"title", "Nid", "album_id", "artist", "duration"});
+                                // Create database Cursor from current playlist
+                                Cursor cursor = (Cursor) callMethod(mSongList, "createSyncCursor", new Class[]{Context.class, String[].class},
+                                        mService, new String[]{"SongId", "title", "artist", "duration", "Nid", "album_id", "AlbumArtLocation"});
 
-                                    final String url;
-                                    if (findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(mSongList))
-                                        url = callMethod(mSongList, "getAlbumArtUrl", mService).toString();
-                                    else
-                                        url = null;
+                                final String url;
+                                if (findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(mSongList))
+                                    url = callMethod(mSongList, "getAlbumArtUrl", mService).toString();
+                                else
+                                    url = null;
 
-                                    TRACKS_COMPAT_ST.clear();
+                                TRACK_ITEMS.clear();
 
-                                    // Loading data
-                                    Set<Long> ids = new HashSet<>();
-                                    cursor.moveToPosition(0);
-                                    int position = getIntField(mDevicePlayback, "mPlayPos");
-                                    do {
-                                        TrackItem track = new TrackItem()
-                                                .setTitle(cursor.getString(0))
-                                                .setArtist(cursor.getString(3))
+                                // Loading data
+                                Set<Long> albumIds = new HashSet<>();
+                                ContentResolver contentResolver = mService.getContentResolver();
+                                cursor.moveToPosition(0);
+                                int position = getIntField(mDevicePlayback, "mPlayPos");
+                                do {
+                                    TrackItem track = TRACK_ITEMS_CACHE.get(cursor.getLong(0));
+                                    if (track == null) {
+                                        track = new TrackItem()
+                                                .setTitle(cursor.getString(1))
+                                                .setArtist(cursor.getString(2))
                                                 .setDuration(callStaticMethod(findClass(GPM + ".utils.StringUtils", lPParam.classLoader),
-                                                        "makeTimeString", mService, cursor.getInt(4)).toString());
-                                        if (Math.abs(position - cursor.getPosition()) < 40) {
-                                            String mMetajamId = cursor.getString(1);
-                                            long mAlbumId = cursor.getLong(2);
-                                            if (mMetajamId != null && mAlbumId != 0) {
-                                                Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader),
-                                                        "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
-                                                Object mDescriptor = callMethod(callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader),
-                                                        "getArtDescriptorFactory"),
-                                                        "createArtDescriptor", getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION"),
-                                                        (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
-                                                Object mArtResolver = callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader),
-                                                        "getArtResolver", mService);
-                                                Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
-                                                if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
-                                                    track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
-                                                } else {
-                                                    track.id = mAlbumId;
-                                                    if (!ids.contains(track.id)) {
-                                                        mRequest = callMethod(mArtResolver, "getArt", mDescriptor, ART_LOADER_COMPLETION_LISTENER);
-                                                        callMethod(mRequest, "retain");
-                                                        ids.add(track.id);
+                                                        "makeTimeString", mService, cursor.getInt(3)).toString());
+                                        if (!PREFS.getBoolean(Common.NP_NO_ALBUM_ART, false) && Math.abs(position - cursor.getPosition()) <= 40) {
+                                            String artLocation = cursor.getString(6);
+                                            if (artLocation.startsWith("mediastore:")) {
+                                                long mediaStoreId;
+                                                Bitmap mediaStoreArt;
+                                                try {
+                                                    mediaStoreId = Long.parseLong(artLocation.substring("mediastore:".length()));
+                                                    Uri uri = Uri.parse("content://media/external/audio/albumart/" + mediaStoreId);
+                                                    Cursor mediaStoreCursor = contentResolver.query(uri, new String[]{"_data"}, null, null, null);
+                                                    if (mediaStoreCursor != null) {
+                                                        mediaStoreCursor.moveToFirst();
+                                                        mediaStoreArt = decodeSampledBitmapFromFile(mediaStoreCursor.getString(0), (int) (mService.getResources().getDisplayMetrics().density * 48));
+                                                        mediaStoreCursor.close();
+                                                    } else {
+                                                        mediaStoreArt = GRAY_BITMAP;
+                                                    }
+                                                } catch (NumberFormatException e) {
+                                                    mediaStoreArt = GRAY_BITMAP;
+                                                }
+                                                track.setArt(mediaStoreArt);
+                                            } else {
+                                                String mMetajamId = cursor.getString(4);
+                                                long mAlbumId = cursor.getLong(5);
+                                                if (mMetajamId != null && mAlbumId != 0) {
+                                                    Object mDocument = callStaticMethod(findClass(GPM + ".utils.NowPlayingUtils", lPParam.classLoader),
+                                                            "createNowPlayingArtDocument", mMetajamId, mAlbumId, url);
+                                                    Object mDescriptor = callMethod(callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader),
+                                                            "getArtDescriptorFactory"),
+                                                            "createArtDescriptor", getStaticObjectField(findClass(GPM + ".art.ArtType", lPParam.classLoader), "NOTIFICATION"),
+                                                            (int) (mService.getResources().getDisplayMetrics().density * 48), 1.0f, mDocument);
+                                                    Object mArtResolver = callStaticMethod(findClass(GPM + ".Factory", lPParam.classLoader),
+                                                            "getArtResolver", mService);
+                                                    Object mRequest = callMethod(mArtResolver, "getAndRetainArtIfAvailable", mDescriptor);
+                                                    if (mRequest != null && (boolean) callMethod(mRequest, "didRenderSuccessfully")) {
+                                                        track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
+                                                    } else {
+                                                        track.id = mAlbumId;
+                                                        if (!albumIds.contains(track.id)) {
+                                                            mRequest = callMethod(mArtResolver, "getArt", mDescriptor, ART_LOADER_COMPLETION_LISTENER);
+                                                            callMethod(mRequest, "retain");
+                                                            albumIds.add(track.id);
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                        TRACKS_COMPAT_ST.add(track);
-                                    } while (cursor.moveToNext());
-                                }
+                                        TRACK_ITEMS_CACHE.put(cursor.getLong(0), track);
+                                    }
+                                    TRACK_ITEMS.add(track);
+                                } while (cursor.moveToNext());
                             } catch (Throwable t) {
                                 log(t);
                             }
@@ -264,16 +207,14 @@ public class NotificationMod {
                             findClass(GPM + ".art.ArtResolver.RequestListener", lPParam.classLoader)}, new InvocationHandler() {
                         @Override
                         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            if (TRACKS_COMPAT_ST.isEmpty()) {
+                            if (TRACK_ITEMS.isEmpty()) {
                                 return null;
                             }
                             Object mRequest = args[0];
                             long mId = getLongField(getObjectField(getObjectField(mRequest, "mDescriptor"), "identifier"), "mId");
-                            for (int i = 0; i < TRACKS_COMPAT_ST.size(); i++) {
-                                if (mId == TRACKS_COMPAT_ST.get(i).id) {
-                                    if ((boolean) callMethod(mRequest, "didRenderSuccessfully")) {
-                                        TRACKS_COMPAT_ST.get(i).setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
-                                    }
+                            for (int i = 0; i < TRACK_ITEMS.size(); i++) {
+                                if (mId == TRACK_ITEMS.get(i).id) {
+                                    TRACK_ITEMS.get(i).setArt((boolean) callMethod(mRequest, "didRenderSuccessfully") ? (Bitmap) callMethod(mRequest, "getResultBitmap") : GRAY_BITMAP);
                                 }
                             }
                             callMethod(mRequest, "release");

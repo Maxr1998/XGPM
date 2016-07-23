@@ -57,18 +57,16 @@
     <string name="category_notification">Notifiche</string>
     <string name="notification_narrow">Usa il vecchio design</string>
     <string name="notification_narrow_summary">Rimuovi i pollici e mostra la cover in grande\nNB. Lollipop e superiori</string>
+    <string name="np_voice_control">Aggiungi comandi vocali</string>
+    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione\nNB. Sovrascritto dal link all\'equalizzatore</string>
+    <string name="np_no_album_art">Nessuna cover nel selettore di tracce</string>
+    <!--<string name="np_no_album_art_summary">Il caricamento delle cover richiede qualche tempo, perciò puoi disabilitarlo.\nInoltre la lista è limitata a 81 canzoni.</string>-->
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Nascondi XGPM dal launcher</string>
 
     <string name="donate">Donami!</string>
 
-    <string name="np_voice_control">Aggiungi comandi vocali</string>
-    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione\nNB. Sovrascritto dal link all\'equalizzatore</string>
-    <string name="np_no_album_art">Nessuna cover nel selettore di tracce</string>
-    <string name="np_no_album_art_summary">Il caricamento delle cover richiede qualche tempo, perciò puoi disabilitarlo.\nInoltre la lista è limitata a 40 canzoni.</string>
     <string name="xposed_description">Varie modifiche per Google Play Music</string>
     <string name="open_GPM">Apri GPM</string>
-    <string name="np_alternative_art_loader">Caricamento Cover Alternativo</string>
-    <string name="np_alternative_art_loader_summary">Se normalmente non vedi le cover nel selettore di tracce, puoi provare questo.</string>
 </resources>
