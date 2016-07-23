@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/category_main">
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="default_my_library"
             android:title="@string/default_my_library" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="remove_situations"
             android:title="@string/remove_situations" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="remove_recommendations"
             android:title="@string/remove_recommendations" />
         <MultiSelectListPreference
@@ -15,10 +15,10 @@
             android:entryValues="@array/my_library_tabs"
             android:key="my_library_hidden_tabs"
             android:title="@string/my_library_hidden_tabs" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="album_grid_three_columns"
             android:title="@string/album_grid_three_columns" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="universal_art_replacer"
             android:summary="@string/universal_art_replacer_summary"
             android:title="@string/universal_art_replacer" />
@@ -29,63 +29,63 @@
             android:entryValues="@array/nav_drawer_items"
             android:key="nav_drawer_hidden_items"
             android:title="@string/nav_drawer_hide_items" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="drawer_hide_unlimited"
             android:title="@string/drawer_hide_unlimited" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="drawer_enable_adaptive_home"
             android:summary="@string/drawer_enable_adaptive_home_summary"
             android:title="@string/drawer_enable_adaptive_home" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_now_playing">
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:disableDependentsState="true"
             android:key="np_new_design"
             android:summary="@string/np_new_design_summary"
             android:title="@string/np_new_design" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="np_tint_icons"
             android:summary="@string/np_tint_icons_summary"
             android:title="@string/np_tint_icons" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:dependency="np_new_design"
             android:key="np_resize_covers"
             android:summary="@string/np_resize_covers_summary"
             android:title="@string/np_resize_covers" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:dependency="np_new_design"
             android:key="np_remove_drop_shadow"
             android:title="@string/np_remove_drop_shadow" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="np_voice_control"
             android:summary="@string/np_voice_control_summary"
             android:title="@string/np_voice_control" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="np_add_eq"
             android:summary="@string/np_add_eq_summary"
             android:title="@string/np_add_eq" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="np_hide_yt_icons"
             android:title="@string/np_hide_yt_icons" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_notification">
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="notification_narrow"
             android:summary="@string/notification_narrow_summary"
             android:title="@string/notification_narrow" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:disableDependentsState="true"
             android:key="np_alternative_art_loader"
             android:summary="@string/np_alternative_art_loader_summary"
             android:title="@string/np_alternative_art_loader" />
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:dependency="np_alternative_art_loader"
             android:key="np_no_album_art"
             android:summary="@string/np_no_album_art_summary"
             android:title="@string/np_no_album_art" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_xgpm">
-        <CustomSwitchPreference
+        <CheckBoxPreference
             android:key="hide_from_launcher"
             android:title="@string/hide_from_launcher" />
     </PreferenceCategory>

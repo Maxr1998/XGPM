@@ -34,7 +34,7 @@ public class NavigationDrawer {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     PREFS.reload();
-                    return PREFS.getBoolean(Common.DRAWER_ENABLE_ADAPTIVE_HOME , false);
+                    return PREFS.getBoolean(Common.DRAWER_ENABLE_ADAPTIVE_HOME, false);
                 }
             });
             setStaticObjectField(findClass(GPM + ".sync.api.MusicUrl", lPParam.classLoader), "MUSIC_PA_URL_HOST", "https://mclients.googleapis.com/music");
