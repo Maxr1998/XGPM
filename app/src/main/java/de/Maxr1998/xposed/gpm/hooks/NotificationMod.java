@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.Maxr1998.trackselectorlib.NotificationHelper;
@@ -143,15 +142,18 @@ class NotificationMod {
                                 int position = getIntField(mDevicePlayback, "mPlayPos");
                                 do {
                                     TrackItem track = TRACK_ITEMS_CACHE.get(cursor.getLong(0));
-                                    if (track == null || track.getArt() == GRAY_BITMAP) {
+                                    String artLocation = cursor.getString(6);
+                                    boolean artAvailableAndDesired = artLocation != null && !PREFS.getBoolean(Common.NP_NO_ALBUM_ART, false);
+                                    if (track == null || (track.getArt() == GRAY_BITMAP && artAvailableAndDesired /* true if loading cover failed previously*/)) {
                                         track = new TrackItem()
                                                 .setTitle(cursor.getString(1))
                                                 .setArtist(cursor.getString(2))
                                                 .setDuration(callStaticMethod(findClass(GPM + ".utils.StringUtils", lPParam.classLoader),
                                                         "makeTimeString", mService, cursor.getInt(3)).toString())
                                                 .setArt(GRAY_BITMAP);
-                                        if (!PREFS.getBoolean(Common.NP_NO_ALBUM_ART, false) && Math.abs(position - cursor.getPosition()) <= 40) {
-                                            String artLocation = cursor.getString(6);
+                                        // Load cover if available, desired and allowed
+                                        if (artAvailableAndDesired && Math.abs(position - cursor.getPosition()) <= 40) {
+                                            // Load from mediastore if local file
                                             if (artLocation.startsWith("mediastore:")) {
                                                 long mediaStoreId;
                                                 try {
@@ -168,6 +170,7 @@ class NotificationMod {
                                                     // do nothing
                                                 }
                                             } else {
+                                                // Load from GPM cache if cloud file
                                                 String mMetajamId = cursor.getString(4);
                                                 long mAlbumId = cursor.getLong(5);
                                                 if (mMetajamId != null && mAlbumId != 0) {
