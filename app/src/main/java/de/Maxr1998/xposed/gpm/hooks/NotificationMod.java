@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import de.Maxr1998.trackselectorlib.NotificationHelper;
@@ -57,10 +58,10 @@ class NotificationMod {
     private static Bitmap decodeSampledBitmapFromFile(String pathName, int size) {
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        // Test-run to get out values
         options.inJustDecodeBounds = true;
-        options.inPreferQualityOverSpeed = false;
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-        options.inDither = true;
         BitmapFactory.decodeFile(pathName, options);
 
         // Calculate inSampleSize
@@ -79,7 +80,7 @@ class NotificationMod {
         if (height > size && width > size) {
             // Calculate the largest inSampleSize value that is a power of 2 and keeps both height and width larger than the
             // requested height and width.
-            while ((height / inSampleSize * 2) > size && (width / inSampleSize * 2) > size)
+            while ((height / (inSampleSize * 2)) > size && (width / (inSampleSize * 2)) > size)
                 inSampleSize *= 2;
         }
         return inSampleSize;
@@ -136,38 +137,36 @@ class NotificationMod {
                                 TRACK_ITEMS.clear();
 
                                 // Loading data
-                                Set<Long> albumIds = new HashSet<>();
+                                Set<Long> loadedAlbumIds = new HashSet<>();
                                 ContentResolver contentResolver = mService.getContentResolver();
                                 cursor.moveToPosition(0);
                                 int position = getIntField(mDevicePlayback, "mPlayPos");
                                 do {
                                     TrackItem track = TRACK_ITEMS_CACHE.get(cursor.getLong(0));
-                                    if (track == null) {
+                                    if (track == null || track.getArt() == GRAY_BITMAP) {
                                         track = new TrackItem()
                                                 .setTitle(cursor.getString(1))
                                                 .setArtist(cursor.getString(2))
                                                 .setDuration(callStaticMethod(findClass(GPM + ".utils.StringUtils", lPParam.classLoader),
-                                                        "makeTimeString", mService, cursor.getInt(3)).toString());
+                                                        "makeTimeString", mService, cursor.getInt(3)).toString())
+                                                .setArt(GRAY_BITMAP);
                                         if (!PREFS.getBoolean(Common.NP_NO_ALBUM_ART, false) && Math.abs(position - cursor.getPosition()) <= 40) {
                                             String artLocation = cursor.getString(6);
                                             if (artLocation.startsWith("mediastore:")) {
                                                 long mediaStoreId;
-                                                Bitmap mediaStoreArt;
                                                 try {
                                                     mediaStoreId = Long.parseLong(artLocation.substring("mediastore:".length()));
                                                     Uri uri = Uri.parse("content://media/external/audio/albumart/" + mediaStoreId);
                                                     Cursor mediaStoreCursor = contentResolver.query(uri, new String[]{"_data"}, null, null, null);
                                                     if (mediaStoreCursor != null) {
                                                         mediaStoreCursor.moveToFirst();
-                                                        mediaStoreArt = decodeSampledBitmapFromFile(mediaStoreCursor.getString(0), (int) (mService.getResources().getDisplayMetrics().density * 48));
+                                                        Bitmap mediaStoreArt = decodeSampledBitmapFromFile(mediaStoreCursor.getString(0), (int) (mService.getResources().getDisplayMetrics().density * 48));
                                                         mediaStoreCursor.close();
-                                                    } else {
-                                                        mediaStoreArt = GRAY_BITMAP;
+                                                        track.setArt(mediaStoreArt);
                                                     }
                                                 } catch (NumberFormatException e) {
-                                                    mediaStoreArt = GRAY_BITMAP;
+                                                    // do nothing
                                                 }
-                                                track.setArt(mediaStoreArt);
                                             } else {
                                                 String mMetajamId = cursor.getString(4);
                                                 long mAlbumId = cursor.getLong(5);
@@ -185,10 +184,10 @@ class NotificationMod {
                                                         track.setArt((Bitmap) callMethod(mRequest, "getResultBitmap"));
                                                     } else {
                                                         track.id = mAlbumId;
-                                                        if (!albumIds.contains(track.id)) {
+                                                        if (!loadedAlbumIds.contains(track.id)) {
+                                                            loadedAlbumIds.add(track.id);
                                                             mRequest = callMethod(mArtResolver, "getArt", mDescriptor, ART_LOADER_COMPLETION_LISTENER);
                                                             callMethod(mRequest, "retain");
-                                                            albumIds.add(track.id);
                                                         }
                                                     }
                                                 }
