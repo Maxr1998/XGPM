@@ -10,8 +10,8 @@ android {
         applicationId "de.Maxr1998.xposed.gpm"
         minSdkVersion 15
         targetSdkVersion 24
-        versionCode 24
-        versionName "1.9.1"
+        versionCode 25
+        versionName "1.9.2"
         resConfigs "en", "it"
         vectorDrawables {
             generatedDensities = ["hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
