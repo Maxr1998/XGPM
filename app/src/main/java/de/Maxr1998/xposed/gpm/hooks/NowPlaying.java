@@ -22,6 +22,7 @@ import android.support.annotation.IdRes;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +75,8 @@ public class NowPlaying {
 
     @IdRes
     private static final int EQ_BUTTON_ID = 0xE01;
+    @IdRes
+    private static final int MEDIA_ROUTE_PICKER_WRAPPER_ID = 0x2ED;
     @ColorInt
     private static int lastColor = Color.parseColor("#9E9E9E");
 
@@ -116,7 +119,7 @@ public class NowPlaying {
                     PREFS.reload();
                     View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
                     View EQ_BUTTON_ID_TMP = ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID);
-                    if(EQ_BUTTON_ID_TMP!=null)
+                    if (EQ_BUTTON_ID_TMP != null)
                         EQ_BUTTON_ID_TMP.setVisibility(queueSwitcher.getVisibility());
                     if (isNewDesignEnabled()) {
                         ((View) getObjectField(param.thisObject, "mMediaRouteButton")).setVisibility(queueSwitcher.getVisibility());
@@ -302,14 +305,23 @@ public class NowPlaying {
                         });
                         customHeaderBar.addView(disconnect(topWrapperRight));
 
+                        ViewGroup mediaRoutePickerWrapper = new FrameLayout(nowPlayingLayout.getContext());
+                        mediaRoutePickerWrapper.setId(MEDIA_ROUTE_PICKER_WRAPPER_ID);
+                        topWrapperRight.addView(mediaRoutePickerWrapper, 0, new RelativeLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT));
                         View mediaRoutePicker = nowPlayingLayout.findViewById(mediaRoutePickerId);
-                        mediaRoutePicker.setMinimumWidth(0);
-                        mediaRoutePicker.setMinimumHeight(0);
-                        topWrapperRight.addView(disconnect(mediaRoutePicker), 0, new RelativeLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT));
-                        View voiceControl = topWrapperRight.findViewById(voiceControlId);
-                        ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).addRule(RelativeLayout.RIGHT_OF, mediaRoutePickerId);
-                        int voiceMargin = ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).leftMargin;
-                        ((RelativeLayout.LayoutParams) mediaRoutePicker.getLayoutParams()).setMargins(voiceMargin, 0, -voiceMargin, 0);
+                        if (mediaRoutePicker != null) {
+                            mediaRoutePickerWrapper.addView(disconnect(mediaRoutePicker));
+                            mediaRoutePicker.setMinimumWidth(0);
+                            mediaRoutePicker.setMinimumHeight(0);
+                            FrameLayout.LayoutParams mediaRoutePickerParams = (FrameLayout.LayoutParams) mediaRoutePicker.getLayoutParams();
+                            mediaRoutePickerParams.topMargin = 0;
+                            mediaRoutePickerParams.bottomMargin = 0;
+                            mediaRoutePickerParams.gravity = Gravity.CENTER;
+                            View voiceControl = topWrapperRight.findViewById(voiceControlId);
+                            ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).addRule(RelativeLayout.RIGHT_OF, MEDIA_ROUTE_PICKER_WRAPPER_ID);
+                            int voiceMargin = ((ViewGroup.MarginLayoutParams) voiceControl.getLayoutParams()).leftMargin;
+                            ((ViewGroup.MarginLayoutParams) mediaRoutePickerWrapper.getLayoutParams()).setMargins(voiceMargin, 0, -voiceMargin, 0);
+                        }
 
                         LinearLayout.LayoutParams customArtPagerLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, 0);
                         customMainContainer.addView(disconnect(artPager), 0, customArtPagerLayoutParams);
@@ -481,8 +493,9 @@ public class NowPlaying {
                         View current = wrapper.getChildAt(j);
                         if (current instanceof ImageView && current.getId() != root.getResources().getIdentifier("play_pause_header", "id", GPM)) {
                             ((ImageView) current).setColorFilter(imageColor);
-                        } else if (current.getClass().getSimpleName().equals("MediaRouteButton")) {
-                            ((Drawable) getObjectField(current, "mRemoteIndicator")).setColorFilter(imageColor, PorterDuff.Mode.SRC_ATOP);
+                        } else if (current instanceof FrameLayout && ((FrameLayout) current).getChildCount() > 0 &&
+                                ((FrameLayout) current).getChildAt(0).getClass().getSimpleName().equals("MediaRouteButton")) {
+                            ((Drawable) getObjectField(((FrameLayout) current).getChildAt(0), "mRemoteIndicator")).setColorFilter(imageColor, PorterDuff.Mode.SRC_ATOP);
                         }
                     }
                 } else {
