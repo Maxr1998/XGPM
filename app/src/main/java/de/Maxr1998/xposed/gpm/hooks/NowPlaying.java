@@ -222,7 +222,7 @@ public class NowPlaying {
                     final RelativeLayout nowPlayingLayout = (RelativeLayout) lIParam.view;
                     int headerPagerId = res.getIdentifier("header_pager", "id", GPM);
                     int topWrapperId = res.getIdentifier("top_wrapper_right", "id", GPM);
-                    int voiceControlId = res.getIdentifier("voice_control", "id", GPM);
+                    //int voiceControlId = res.getIdentifier("voice_control", "id", GPM);
                     int queueSwitcherId = res.getIdentifier("queue_switcher", "id", GPM);
                     int artPagerId = res.getIdentifier("art_pager", "id", GPM);
                     int playQueueWrapperId = res.getIdentifier("play_queue_wrapper", "id", GPM);
@@ -248,7 +248,7 @@ public class NowPlaying {
                         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                                 res.getDimensionPixelSize(res.getIdentifier("nowplaying_screen_info_block_width", "dimen", GPM)),
                                 res.getDimensionPixelSize(res.getIdentifier("nowplaying_screen_info_block_height", "dimen", GPM)));
-                        params.addRule(RelativeLayout.RIGHT_OF, voiceControlId);
+                        params.addRule(RelativeLayout.RIGHT_OF, /*voiceControlId*/MEDIA_ROUTE_PICKER_WRAPPER_ID);
                         eqButton.setLayoutParams(params);
                         //noinspection deprecation
                         eqButton.setImageDrawable(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? modRes.getDrawable(R.drawable.ic_equalizer_black_24dp, null) : modRes.getDrawable(R.drawable.ic_equalizer_black_24dp));
@@ -317,10 +317,10 @@ public class NowPlaying {
                             mediaRoutePickerParams.topMargin = 0;
                             mediaRoutePickerParams.bottomMargin = 0;
                             mediaRoutePickerParams.gravity = Gravity.CENTER;
-                            View voiceControl = topWrapperRight.findViewById(voiceControlId);
+                            /*View voiceControl = topWrapperRight.findViewById(voiceControlId);
                             ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).addRule(RelativeLayout.RIGHT_OF, MEDIA_ROUTE_PICKER_WRAPPER_ID);
                             int voiceMargin = ((ViewGroup.MarginLayoutParams) voiceControl.getLayoutParams()).leftMargin;
-                            ((ViewGroup.MarginLayoutParams) mediaRoutePickerWrapper.getLayoutParams()).setMargins(voiceMargin, 0, -voiceMargin, 0);
+                            ((ViewGroup.MarginLayoutParams) mediaRoutePickerWrapper.getLayoutParams()).setMargins(voiceMargin, 0, -voiceMargin, 0);*/
                         }
 
                         LinearLayout.LayoutParams customArtPagerLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, 0);
@@ -450,7 +450,7 @@ public class NowPlaying {
         return v;
     }
 
-    private static void updateTint(final Object nowPlayingFragment) {
+    private static void updateTint(final Object nowPlayingFragment) throws Throwable {
         if (PREFS.getBoolean(Common.NP_TINT_ICONS, false)) {
             ViewGroup root = (ViewGroup) getObjectField(nowPlayingFragment, "mRootView");
             Object currentState = getObjectField(nowPlayingFragment, "mCurrentState");
@@ -475,7 +475,11 @@ public class NowPlaying {
                         ((Handler) getObjectField(nowPlayingFragment, "mHandler")).postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                updateTint(nowPlayingFragment);
+                                try {
+                                    updateTint(nowPlayingFragment);
+                                } catch (Throwable t) {
+                                    log(t);
+                                }
                             }
                         }, 200);
                         return;
@@ -484,18 +488,20 @@ public class NowPlaying {
                 if (isNewDesignEnabled()) {
                     // Tint header bar & its items
                     RelativeLayout customHeaderBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
-                    customHeaderBar.setBackgroundColor(lastColor);
-                    RelativeLayout wrapper = (RelativeLayout) customHeaderBar.getChildAt(0);
-                    double contrastBlack = ColorUtils.calculateContrast(Color.BLACK, lastColor);
-                    double contrastWhite = ColorUtils.calculateContrast(Color.WHITE, lastColor);
-                    int imageColor = contrastBlack > contrastWhite ? Color.BLACK : Color.WHITE;
-                    for (int j = 0; j < wrapper.getChildCount(); j++) {
-                        View current = wrapper.getChildAt(j);
-                        if (current instanceof ImageView && current.getId() != root.getResources().getIdentifier("play_pause_header", "id", GPM)) {
-                            ((ImageView) current).setColorFilter(imageColor);
-                        } else if (current instanceof FrameLayout && ((FrameLayout) current).getChildCount() > 0 &&
-                                ((FrameLayout) current).getChildAt(0).getClass().getSimpleName().equals("MediaRouteButton")) {
-                            ((Drawable) getObjectField(((FrameLayout) current).getChildAt(0), "mRemoteIndicator")).setColorFilter(imageColor, PorterDuff.Mode.SRC_ATOP);
+                    if (customHeaderBar != null) {
+                        customHeaderBar.setBackgroundColor(lastColor);
+                        RelativeLayout wrapper = (RelativeLayout) customHeaderBar.getChildAt(0);
+                        double contrastBlack = ColorUtils.calculateContrast(Color.BLACK, lastColor);
+                        double contrastWhite = ColorUtils.calculateContrast(Color.WHITE, lastColor);
+                        int imageColor = contrastBlack > contrastWhite ? Color.BLACK : Color.WHITE;
+                        for (int j = 0; j < wrapper.getChildCount(); j++) {
+                            View current = wrapper.getChildAt(j);
+                            if (current instanceof ImageView && current.getId() != root.getResources().getIdentifier("play_pause_header", "id", GPM)) {
+                                ((ImageView) current).setColorFilter(imageColor);
+                            } else if (current instanceof FrameLayout && ((FrameLayout) current).getChildCount() > 0 &&
+                                    ((FrameLayout) current).getChildAt(0).getClass().getSimpleName().equals("MediaRouteButton")) {
+                                ((Drawable) getObjectField(((FrameLayout) current).getChildAt(0), "mRemoteIndicator")).setColorFilter(imageColor, PorterDuff.Mode.SRC_ATOP);
+                            }
                         }
                     }
                 } else {
@@ -523,7 +529,7 @@ public class NowPlaying {
         }
     }
 
-    private static void tintQueueButton(Object nowPlayingFragment) {
+    private static void tintQueueButton(Object nowPlayingFragment) throws Throwable {
         ImageButton queueSwitcher = (ImageButton) getObjectField(nowPlayingFragment, "mQueueSwitcher");
         if (getBooleanField(nowPlayingFragment, "mQueueShown")) {
             queueSwitcher.setColorFilter(lastColor);

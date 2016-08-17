@@ -63,14 +63,6 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
             NotificationMod.init(lPParam);
         }
 
-        // Enable voice control
-        findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isSnappleEnabled", Context.class, new XC_MethodReplacement() {
-            @Override
-            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                return PREFS.getBoolean(Common.NP_VOICE_CONTROL, false);
-            }
-        });
-
         // Debug
         if (BuildConfig.DEBUG) {
             try {

@@ -57,8 +57,8 @@
     <string name="category_notification">Notifiche</string>
     <string name="notification_narrow">Usa il vecchio design</string>
     <string name="notification_narrow_summary">Rimuovi i pollici e mostra la cover in grande\nNB. Lollipop e superiori</string>
-    <string name="np_voice_control">Aggiungi comandi vocali</string>
-    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione</string>
+    <!--<string name="np_voice_control">Aggiungi comandi vocali</string>
+    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione</string>-->
     <string name="np_no_album_art">Nessuna cover nel selettore di tracce</string>
     <!--<string name="np_no_album_art_summary">Il caricamento delle cover richiede qualche tempo, perciò puoi disabilitarlo.\nInoltre la lista è limitata a 81 canzoni.</string>-->
 
