@@ -79,7 +79,7 @@ public class NavigationDrawer {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     PREFS.reload();
-                    ArrayList<Object> screens = new ArrayList<>(Arrays.asList((Object[]) param.getResult()));
+                    ArrayList<Object> screens = (ArrayList<Object>) param.getResult();
                     for (int i = 0; i < screens.size(); i++) {
                         String tag = (String) XposedHelpers.callMethod(screens.get(i), "getTag");
                         if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.<String>emptySet()).contains(tag)) {
@@ -91,7 +91,6 @@ public class NavigationDrawer {
                         }
                     }
                     screens.trimToSize();
-                    param.setResult(Arrays.copyOf(screens.toArray(), screens.size(), (Class<? extends Object[]>) findClass(GPM + ".ui.HomeActivity.Screen[]", lPParam.classLoader)));
                 }
             });
 
