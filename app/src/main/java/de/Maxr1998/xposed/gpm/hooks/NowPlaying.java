@@ -3,6 +3,7 @@ package de.Maxr1998.xposed.gpm.hooks;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XModuleResources;
 import android.content.res.XResources;
@@ -57,6 +58,7 @@ import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.callStaticMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
+import static de.robv.android.xposed.XposedHelpers.findMethodBestMatch;
 import static de.robv.android.xposed.XposedHelpers.getBooleanField;
 import static de.robv.android.xposed.XposedHelpers.getIntField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
@@ -122,9 +124,46 @@ public class NowPlaying {
                     if (EQ_BUTTON_ID_TMP != null)
                         EQ_BUTTON_ID_TMP.setVisibility(queueSwitcher.getVisibility());
                     if (isNewDesignEnabled()) {
-                        ((View) getObjectField(param.thisObject, "mMediaRouteButton")).setVisibility(queueSwitcher.getVisibility());
+                        ((View) getObjectField(param.thisObject, "mRootView")).findViewById(MEDIA_ROUTE_PICKER_WRAPPER_ID).setVisibility(queueSwitcher.getVisibility());
                     }
                     updateTint(param.thisObject);
+                }
+            });
+
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "onMoving", EXPANDING_SCROLL_VIEW, EXPANDING_STATE, float.class, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    if (isNewDesignEnabled() && !param.args[1].toString().equals("HIDDEN")) {
+                        System.out.println("Moving " + param.args[1].toString());
+                        ViewGroup root = (ViewGroup) getObjectField(param.thisObject, "mRootView");
+                        Resources res = root.getResources();
+                        RelativeLayout customHeaderBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
+                        if (customHeaderBar != null) {
+                            float ratio = (float) param.args[2];
+                            customHeaderBar.setBackgroundColor(ColorUtils.blendARGB(Color.WHITE, lastColor, ratio));
+
+                            RelativeLayout customTitleBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("title_bar", "id", XGPM));
+                            View headerPager = root.findViewById(res.getIdentifier("header_pager", "id", GPM));
+                            Class[] addViewInnerParams = new Class[]{View.class, int.class, ViewGroup.LayoutParams.class, boolean.class};
+                            if (ratio > 0.7f) {
+                                headerPager.setAlpha(1f);
+                                if (headerPager.getParent() != customTitleBar) {
+                                    //customTitleBar.requestLayout();
+                                    customTitleBar.invalidate();
+                                    findMethodBestMatch(ViewGroup.class, "addViewInner", addViewInnerParams)
+                                            .invoke(customTitleBar, disconnect(headerPager, false), -1, headerPager.getLayoutParams(), false);
+                                }
+                            } else {
+                                if (headerPager.getParent() != customHeaderBar) {
+                                    //customHeaderBar.requestLayout();
+                                    customHeaderBar.invalidate();
+                                    findMethodBestMatch(ViewGroup.class, "addViewInner", addViewInnerParams)
+                                            .invoke(customHeaderBar, disconnect(headerPager, false), -1, headerPager.getLayoutParams(), false);
+                                }
+                                headerPager.setAlpha((float) Math.pow(1f - ratio, 6));
+                            }
+                        }
+                    }
                 }
             });
 
@@ -356,7 +395,7 @@ public class NowPlaying {
                         customProgressBar.addView(totalTime);
 
                         customTitleBar.addView(disconnect(headerPager), 0);
-                        ((RelativeLayout.LayoutParams) headerPager.getLayoutParams()).addRule(RelativeLayout.CENTER_VERTICAL);
+                        headerPager.getLayoutParams().height = customHeaderBar.getLayoutParams().height; // = 64dp
                         headerPager.setBackgroundColor(0);
 
                         customPlaybackOptionsBar.addView(disconnect(repeat), WRAP_CONTENT, MATCH_PARENT);
@@ -443,9 +482,14 @@ public class NowPlaying {
     }
 
     private static <V extends View> V disconnect(V v) {
+        return disconnect(v, true);
+    }
+
+    private static <V extends View> V disconnect(V v, boolean relayout) {
         ViewGroup parent = (ViewGroup) v.getParent();
         if (parent != null) {
-            parent.removeView(v);
+            if (relayout) parent.removeView(v);
+            else parent.removeViewInLayout(v);
         }
         return v;
     }
@@ -489,7 +533,6 @@ public class NowPlaying {
                     // Tint header bar & its items
                     RelativeLayout customHeaderBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
                     if (customHeaderBar != null) {
-                        customHeaderBar.setBackgroundColor(lastColor);
                         RelativeLayout wrapper = (RelativeLayout) customHeaderBar.getChildAt(0);
                         double contrastBlack = ColorUtils.calculateContrast(Color.BLACK, lastColor);
                         double contrastWhite = ColorUtils.calculateContrast(Color.WHITE, lastColor);
@@ -523,8 +566,6 @@ public class NowPlaying {
                 }
                 ImageButton playPause = (ImageButton) root.findViewById(root.getResources().getIdentifier("pause", "id", GPM));
                 playPause.getBackground().setColorFilter(lastColor, PorterDuff.Mode.SRC_ATOP);
-            } else if (currentState == Enum.valueOf(exStateClass, "COLLAPSED") && isNewDesignEnabled()) {
-                root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM)).setBackgroundColor(Color.WHITE);
             }
         }
     }
