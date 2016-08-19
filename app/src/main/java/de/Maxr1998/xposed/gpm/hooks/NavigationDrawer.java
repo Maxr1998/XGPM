@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -22,23 +21,12 @@ import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.setIntField;
-import static de.robv.android.xposed.XposedHelpers.setStaticObjectField;
 
 public class NavigationDrawer {
 
     @SuppressWarnings("unchecked")
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
-            // Enable new adaptive home
-            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isAdaptiveHomeEnabled", Context.class, new XC_MethodReplacement() {
-                @Override
-                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
-                    return PREFS.getBoolean(Common.DRAWER_ENABLE_ADAPTIVE_HOME, false);
-                }
-            });
-            setStaticObjectField(findClass(GPM + ".sync.api.MusicUrl", lPParam.classLoader), "MUSIC_PA_URL_HOST", "https://mclients.googleapis.com/music");
-
             // Constant classes
             final Class screenClass = findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader);
             final Class homeMenuScreensClass = findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader);

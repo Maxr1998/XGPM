@@ -51,6 +51,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
     private void doHooks(XC_LoadPackage.LoadPackageParam lPParam) {
         PREFS.reload();
         // UI
+        Features.init(lPParam);
         MainStage.init(lPParam);
         MyLibrary.init(lPParam);
         NavigationDrawer.init(lPParam);
