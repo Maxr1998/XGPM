@@ -79,6 +79,8 @@ public class NowPlaying {
     private static final int EQ_BUTTON_ID = 0xE01;
     @IdRes
     private static final int MEDIA_ROUTE_PICKER_WRAPPER_ID = 0x2ED;
+    @IdRes
+    private static final int QUEUE_TAG_KEY = 0xffffffff;
     @ColorInt
     private static int lastColor = Color.parseColor("#9E9E9E");
 
@@ -95,6 +97,44 @@ public class NowPlaying {
                     return true;
                 }
             });*/
+
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "initializeView", new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
+                    final View mQueueWrapper = ((View) getObjectField(param.thisObject, "mQueueWrapper"));
+                    if (mQueueWrapper.getTag(QUEUE_TAG_KEY) != null) {
+                        setBooleanField(param.thisObject, "mQueueShown", false);
+
+                        final View mQueuePlayingFromHeaderView = (View) getObjectField(param.thisObject, "mQueuePlayingFromHeaderView");
+                        mQueuePlayingFromHeaderView.setVisibility(View.GONE);
+
+                        final int customProgressBarId = modRes.getIdentifier("progress_bar", "id", XGPM);
+                        final int customPlayControlsBarId = modRes.getIdentifier("play_controls_bar", "id", XGPM);
+                        final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mQueueWrapper.getLayoutParams();
+                        ((View) getObjectField(param.thisObject, "mQueueSwitcher")).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                boolean wasQueueShown = getBooleanField(param.thisObject, "mQueueShown");
+                                setBooleanField(param.thisObject, "mQueueShown", !wasQueueShown);
+                                boolean isQueueShown = !wasQueueShown;
+                                mQueuePlayingFromHeaderView.setVisibility(isQueueShown ? View.VISIBLE : View.GONE);
+                                mQueueWrapper.getRootView().findViewById(customProgressBarId).setVisibility(isQueueShown ? View.GONE : View.VISIBLE);
+                                layoutParams.addRule(RelativeLayout.ABOVE, isQueueShown ? customPlayControlsBarId : customProgressBarId);
+                                mQueueWrapper.requestLayout();
+                            }
+                        });
+                    }
+                }
+            });
+
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "showQueue", boolean.class, boolean.class, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    View mQueueWrapper = ((View) getObjectField(param.thisObject, "mQueueWrapper"));
+                    if (mQueueWrapper.getTag(QUEUE_TAG_KEY) != null)
+                        mQueueWrapper.setVisibility(View.VISIBLE);
+                }
+            });
 
             // Icon tinting from cover Palette
             findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "setCurrentPage", new XC_MethodHook() {
@@ -381,11 +421,14 @@ public class NowPlaying {
 
                         RelativeLayout.LayoutParams playQueueWrapperLayoutParams = (RelativeLayout.LayoutParams) playQueueWrapper.getLayoutParams();
                         playQueueWrapperLayoutParams.addRule(RelativeLayout.BELOW, customHeaderBarId);
-                        playQueueWrapperLayoutParams.addRule(RelativeLayout.ABOVE, customPlayControlsBarId);
-                        (portrait ? customLayout : (RelativeLayout) customLayout.getChildAt(2)).addView(disconnect(playQueueWrapper));
+                        playQueueWrapperLayoutParams.addRule(RelativeLayout.ABOVE, portrait ? customPlayControlsBarId : customProgressBarId);
+                        (portrait ? customLayout : (RelativeLayout) customLayout.getChildAt(2)).addView(disconnect(playQueueWrapper), portrait ? -1 : 2);
 
                         ((LinearLayout.LayoutParams) playQueueWrapper.findViewById(res.getIdentifier("queue_header_view", "id", GPM)).getLayoutParams()).topMargin = 0;
                         playQueueWrapper.findViewById(res.getIdentifier("play_queue", "id", GPM)).setPadding(0, 0, 0, 0);
+
+                        if (!portrait)
+                            playQueueWrapper.setTag(QUEUE_TAG_KEY, new Object());
 
                         RelativeLayout.LayoutParams progressLayoutParams = (RelativeLayout.LayoutParams) progress.getLayoutParams();
                         progressLayoutParams.addRule(RelativeLayout.ABOVE, 0);
