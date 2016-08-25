@@ -35,7 +35,14 @@ public class Features {
                 }
             });
 
-            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isHeadphoneNotificationBroadcastReceiverEnabled", new XC_MethodReplacement() {
+            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isHeadphoneNotificationAvailableForUser", Context.class, new XC_MethodReplacement() {
+                @Override
+                protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
+                    return true;
+                }
+            });
+
+            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isHeadphoneNotificationBroadcastReceiverEnabled", Context.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
                     return true;

@@ -10,12 +10,12 @@ import android.content.res.XResources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.AnimatedStateListDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
@@ -144,18 +144,18 @@ public class NowPlaying {
 
                             RelativeLayout customTitleBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("title_bar", "id", XGPM));
                             View headerPager = root.findViewById(res.getIdentifier("header_pager", "id", GPM));
+                            if (headerPager == null)
+                                headerPager = root.findViewById(res.getIdentifier("tablet_header", "id", GPM));
                             Class[] addViewInnerParams = new Class[]{View.class, int.class, ViewGroup.LayoutParams.class, boolean.class};
-                            if (ratio > 0.7f) {
+                            if (ratio > 0.6f) {
                                 headerPager.setAlpha(1f);
                                 if (headerPager.getParent() != customTitleBar) {
-                                    //customTitleBar.requestLayout();
                                     customTitleBar.invalidate();
                                     findMethodBestMatch(ViewGroup.class, "addViewInner", addViewInnerParams)
                                             .invoke(customTitleBar, disconnect(headerPager, false), -1, headerPager.getLayoutParams(), false);
                                 }
                             } else {
                                 if (headerPager.getParent() != customHeaderBar) {
-                                    //customHeaderBar.requestLayout();
                                     customHeaderBar.invalidate();
                                     findMethodBestMatch(ViewGroup.class, "addViewInner", addViewInnerParams)
                                             .invoke(customHeaderBar, disconnect(headerPager, false), -1, headerPager.getLayoutParams(), false);
@@ -260,8 +260,9 @@ public class NowPlaying {
                     // Views
                     final RelativeLayout nowPlayingLayout = (RelativeLayout) lIParam.view;
                     int headerPagerId = res.getIdentifier("header_pager", "id", GPM);
+                    int tabletHeaderId = res.getIdentifier("tablet_header", "id", GPM);
+                    int tabletPlayControlsId = res.getIdentifier("tablet_collapsed_play_controls", "id", GPM);
                     int topWrapperId = res.getIdentifier("top_wrapper_right", "id", GPM);
-                    //int voiceControlId = res.getIdentifier("voice_control", "id", GPM);
                     int queueSwitcherId = res.getIdentifier("queue_switcher", "id", GPM);
                     int artPagerId = res.getIdentifier("art_pager", "id", GPM);
                     int playQueueWrapperId = res.getIdentifier("play_queue_wrapper", "id", GPM);
@@ -270,6 +271,9 @@ public class NowPlaying {
                     int mediaRoutePickerId = res.getIdentifier("media_route_picker", "id", GPM);
                     int playControlsId = res.getIdentifier("play_controls", "id", GPM);
                     View headerPager = nowPlayingLayout.findViewById(headerPagerId);
+                    if (headerPager == null)
+                        headerPager = nowPlayingLayout.findViewById(tabletHeaderId);
+                    View tabletPlaybackControlsWrapper = nowPlayingLayout.findViewById(tabletPlayControlsId);
                     RelativeLayout topWrapperRight = (RelativeLayout) nowPlayingLayout.findViewById(topWrapperId);
                     View queueSwitcher = topWrapperRight.findViewById(queueSwitcherId);
                     View artPager = nowPlayingLayout.findViewById(artPagerId);
@@ -331,8 +335,8 @@ public class NowPlaying {
                         int customPlayControlsBarId = modRes.getIdentifier("play_controls_bar", "id", XGPM);
                         RelativeLayout customHeaderBar = (RelativeLayout) customLayout.findViewById(customHeaderBarId);
                         LinearLayout customMainContainer = (LinearLayout) customLayout.findViewById(customMainContainerId);
-                        RelativeLayout customProgressBar = (RelativeLayout) customMainContainer.findViewById(customProgressBarId);
-                        RelativeLayout customTitleBar = (RelativeLayout) customMainContainer.findViewById(customTitleBarId);
+                        RelativeLayout customProgressBar = (RelativeLayout) customLayout.findViewById(customProgressBarId);
+                        RelativeLayout customTitleBar = (RelativeLayout) customLayout.findViewById(customTitleBarId);
                         LinearLayout customPlaybackOptionsBar = (LinearLayout) customTitleBar.findViewById(customPlaybackOptionsBarId);
                         RelativeLayout customPlayControlsBar = (RelativeLayout) customLayout.findViewById(customPlayControlsBarId);
 
@@ -343,6 +347,10 @@ public class NowPlaying {
                             }
                         });
                         customHeaderBar.addView(disconnect(topWrapperRight));
+
+                        if (tabletPlaybackControlsWrapper != null) {
+                            customHeaderBar.addView(disconnect(tabletPlaybackControlsWrapper));
+                        }
 
                         ViewGroup mediaRoutePickerWrapper = new FrameLayout(nowPlayingLayout.getContext());
                         mediaRoutePickerWrapper.setId(MEDIA_ROUTE_PICKER_WRAPPER_ID);
@@ -356,25 +364,25 @@ public class NowPlaying {
                             mediaRoutePickerParams.topMargin = 0;
                             mediaRoutePickerParams.bottomMargin = 0;
                             mediaRoutePickerParams.gravity = Gravity.CENTER;
-                            /*View voiceControl = topWrapperRight.findViewById(voiceControlId);
-                            ((RelativeLayout.LayoutParams) voiceControl.getLayoutParams()).addRule(RelativeLayout.RIGHT_OF, MEDIA_ROUTE_PICKER_WRAPPER_ID);
-                            int voiceMargin = ((ViewGroup.MarginLayoutParams) voiceControl.getLayoutParams()).leftMargin;
-                            ((ViewGroup.MarginLayoutParams) mediaRoutePickerWrapper.getLayoutParams()).setMargins(voiceMargin, 0, -voiceMargin, 0);*/
                         }
 
-                        LinearLayout.LayoutParams customArtPagerLayoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, 0);
+                        final boolean portrait = customMainContainer.indexOfChild(customTitleBar) >= 0;
+
+                        LinearLayout.LayoutParams customArtPagerLayoutParams = portrait ? new LinearLayout.LayoutParams(MATCH_PARENT, 0) : new LinearLayout.LayoutParams(0, MATCH_PARENT);
                         customMainContainer.addView(disconnect(artPager), 0, customArtPagerLayoutParams);
                         artPager.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
                             @Override
                             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                                v.getLayoutParams().height = v.getMeasuredWidth();
+                                if (portrait)
+                                    v.getLayoutParams().height = v.getMeasuredWidth();
+                                else v.getLayoutParams().width = v.getMeasuredHeight();
                             }
                         });
 
                         RelativeLayout.LayoutParams playQueueWrapperLayoutParams = (RelativeLayout.LayoutParams) playQueueWrapper.getLayoutParams();
                         playQueueWrapperLayoutParams.addRule(RelativeLayout.BELOW, customHeaderBarId);
                         playQueueWrapperLayoutParams.addRule(RelativeLayout.ABOVE, customPlayControlsBarId);
-                        customLayout.addView(disconnect(playQueueWrapper));
+                        (portrait ? customLayout : (RelativeLayout) customLayout.getChildAt(2)).addView(disconnect(playQueueWrapper));
 
                         ((LinearLayout.LayoutParams) playQueueWrapper.findViewById(res.getIdentifier("queue_header_view", "id", GPM)).getLayoutParams()).topMargin = 0;
                         playQueueWrapper.findViewById(res.getIdentifier("play_queue", "id", GPM)).setPadding(0, 0, 0, 0);
@@ -409,6 +417,12 @@ public class NowPlaying {
                         backup.addView(disconnect(nowPlayingLayout.findViewById(res.getIdentifier("overlay_ads_view", "id", GPM))));
                         backup.addView(disconnect(nowPlayingLayout.findViewById(res.getIdentifier("companion_ads_background", "id", GPM))));
                         backup.addView(disconnect(nowPlayingLayout.findViewById(res.getIdentifier("companion_ads_view", "id", GPM))));
+                        View tabletHeaderAdsWrapper = nowPlayingLayout.findViewById(res.getIdentifier("tablet_collapsed_ad_view", "id", GPM));
+                        if (tabletHeaderAdsWrapper != null)
+                            backup.addView(disconnect(tabletHeaderAdsWrapper));
+                        View tabletAdsHeader = nowPlayingLayout.findViewById(res.getIdentifier("tablet_ads_header", "id", GPM));
+                        if (tabletAdsHeader != null)
+                            backup.addView(disconnect(tabletAdsHeader));
 
                         nowPlayingLayout.removeAllViews();
                         nowPlayingLayout.addView(backup, 0, 0);
@@ -533,6 +547,7 @@ public class NowPlaying {
                     // Tint header bar & its items
                     RelativeLayout customHeaderBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
                     if (customHeaderBar != null) {
+                        customHeaderBar.setBackgroundColor(lastColor);
                         RelativeLayout wrapper = (RelativeLayout) customHeaderBar.getChildAt(0);
                         double contrastBlack = ColorUtils.calculateContrast(Color.BLACK, lastColor);
                         double contrastWhite = ColorUtils.calculateContrast(Color.WHITE, lastColor);
@@ -561,7 +576,7 @@ public class NowPlaying {
                 ClipDrawable clipProgress = (ClipDrawable) progress.findDrawableByLayerId(root.getResources().getIdentifier("progress", "id", "android"));
                 clipProgress.setColorFilter(lastColor, PorterDuff.Mode.SRC_IN);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    ScaleDrawable thumb = (ScaleDrawable) seekBar.getThumb();
+                    AnimatedStateListDrawable thumb = (AnimatedStateListDrawable) seekBar.getThumb();
                     thumb.setColorFilter(lastColor, PorterDuff.Mode.SRC_IN);
                 }
                 ImageButton playPause = (ImageButton) root.findViewById(root.getResources().getIdentifier("pause", "id", GPM));
