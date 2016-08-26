@@ -121,18 +121,26 @@ public class NowPlaying {
                                 mQueueWrapper.getRootView().findViewById(customProgressBarId).setVisibility(isQueueShown ? View.GONE : View.VISIBLE);
                                 layoutParams.addRule(RelativeLayout.ABOVE, isQueueShown ? customPlayControlsBarId : customProgressBarId);
                                 mQueueWrapper.requestLayout();
+                                callMethod(getObjectField(param.thisObject, "mQueue"), "scrollToNowPlaying");
                             }
                         });
                     }
                 }
             });
 
-            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "showQueue", boolean.class, boolean.class, new XC_MethodHook() {
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "setupPlayQueue", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    callMethod(getObjectField(param.thisObject, "mQueueAdapter"), "showAlbumArt", true);
+                }
+            });
+
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "showQueue", boolean.class, boolean.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     View mQueueWrapper = ((View) getObjectField(param.thisObject, "mQueueWrapper"));
                     if (mQueueWrapper.getTag(QUEUE_TAG_KEY) != null)
-                        mQueueWrapper.setVisibility(View.VISIBLE);
+                        param.setResult(null);
                 }
             });
 
