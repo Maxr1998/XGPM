@@ -2,6 +2,7 @@ package de.Maxr1998.xposed.gpm.hooks;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
@@ -87,23 +88,21 @@ class NotificationMod {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
-            //Create gray bitmap
+            // Create gray bitmap
             GRAY_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.RGB_565);
             GRAY_BITMAP.eraseColor(Color.LTGRAY);
             // TRACK SELECTION
             // Edit notification
-            findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "buildLNotification", new XC_MethodHook() {
+            findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "updateNotification", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Context mContext = (Context) param.thisObject;
-                    Notification mNotification = (Notification) param.getResult();
-                    PREFS.reload();
-                    if (NotificationHelper.isSupported(mNotification)) {
+                    Notification mNotification = (Notification) getObjectField(param.thisObject, "mNotification");
+                    if (mNotification != null && NotificationHelper.isSupported(mNotification)) {
                         ArrayList<Bundle> tracks = new ArrayList<>();
-                        for (int i = 0; i < TRACK_ITEMS.size(); i++)
-                            tracks.add(TRACK_ITEMS.get(i).get());
-                        TRACK_ITEMS.clear();
-                        NotificationHelper.insertToNotification(mNotification, tracks, mContext, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
+                        while (TRACK_ITEMS.size() > 0)
+                            tracks.add(TRACK_ITEMS.remove(0).get());
+                        NotificationHelper.insertToNotification(mNotification, tracks, (Context) param.thisObject, getIntField(getObjectField(param.thisObject, "mDevicePlayback"), "mPlayPos"));
+                        ((NotificationManager) ((Context) param.thisObject).getSystemService(Context.NOTIFICATION_SERVICE)).notify(1, mNotification);
                     }
                 }
             });
