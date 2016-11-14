@@ -7,6 +7,7 @@ public final class Common {
     public static final String GPM = "com.google.android.music";
     //
     public static final String DEFAULT_MY_LIBRARY = "default_my_library";
+    public static final String RESTORE_OLD_MAINSTAGE = "restore_old_mainstage";
     public static final String REMOVE_SITUATIONS = "remove_situations";
     public static final String REMOVE_RECOMMENDATIONS = "remove_recommendations";
     public static final String MY_LIBRARY_HIDDEN_TABS = "my_library_hidden_tabs";
@@ -15,7 +16,6 @@ public final class Common {
     //
     public static final String NAV_DRAWER_HIDDEN_ITEMS = "nav_drawer_hidden_items";
     public static final String DRAWER_HIDE_UNLIMITED = "drawer_hide_unlimited";
-    public static final String DRAWER_ENABLE_ADAPTIVE_HOME = "drawer_enable_adaptive_home";
     //
     public static final String NP_NEW_DESIGN = "np_new_design";
     public static final String NP_TINT_ICONS = "np_tint_icons";

@@ -17,7 +17,7 @@
         <item>radio</item>
         <item>downloaded_only</item>
         <item>shop</item>
-        <item>send_gift</item>
         <item>help</item>
+        <item>upgrade_to_family</item>
     </string-array>
 </resources>

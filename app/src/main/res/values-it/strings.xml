@@ -26,15 +26,15 @@
     <string name="category_drawer">Drawer</string>
     <string name="nav_drawer_hide_items">Nascondi elementi del drawer</string>
     <string-array name="nav_drawer_items_desc">
-        <item>Classifiche</item>
+        <item>Top charts</item>
         <item>Nuove uscite</item>
         <item>Playlist</item>
         <item>Podcast</item>
         <item>Radio</item>
         <item>Solo scaricate</item>
-        <item>Acquista</item>
-        <item>Invia regalo</item>
+        <item>Shop</item>
         <item>Guida e feedback</item>
+        <item>Upgrade to family</item>
     </string-array>
     <string name="drawer_hide_unlimited">Nascondi il link di abbonamento</string>
     <string name="drawer_enable_adaptive_home">Abilita Home adattiva [SPERIMENTALE]</string>

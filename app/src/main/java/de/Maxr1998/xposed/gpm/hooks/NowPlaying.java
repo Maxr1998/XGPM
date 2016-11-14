@@ -2,11 +2,13 @@ package de.Maxr1998.xposed.gpm.hooks;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XModuleResources;
 import android.content.res.XResources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -17,12 +19,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
 import android.support.annotation.IdRes;
+import android.support.annotation.LayoutRes;
 import android.support.v4.graphics.ColorUtils;
 import android.support.v7.graphics.Palette;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,14 +70,14 @@ import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.getStaticObjectField;
 import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 
-public class NowPlaying {
+class NowPlaying {
 
     private static final XModuleResources modRes = createInstance(MODULE_PATH, null);
 
     // Classes
     private static final String NOW_PLAYING_FRAGMENT = GPM + ".ui.NowPlayingFragment";
-    private static final String PLAYBACK_CONTROLS = GPM + /*".ui.nowplaying2" + */ ".PlaybackControls";
-    private static final String EXPANDING_SCROLL_VIEW = GPM + ".widgets.ExpandingScrollView";
+    private static final String PLAYBACK_CONTROLS = GPM + ".ui.playback.PlaybackControls";
+    private static final String EXPANDING_SCROLL_VIEW = GPM + ".ui.common.ExpandingScrollView";
     private static final String EXPANDING_STATE = EXPANDING_SCROLL_VIEW + ".ExpandingState";
 
     @IdRes
@@ -84,12 +89,37 @@ public class NowPlaying {
     @ColorInt
     private static int lastColor = Color.parseColor("#9E9E9E");
 
+    private static int assetCookieLayout;
+
     private static boolean isNewDesignEnabled() {
         return PREFS.getBoolean(Common.NP_NEW_DESIGN, false);
     }
 
-    public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
+    static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
+            findAndHookMethod(LayoutInflater.class, "inflate", int.class, ViewGroup.class, boolean.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (!isNewDesignEnabled()) {
+                        return;
+                    }
+                    LayoutInflater li = (LayoutInflater) param.thisObject;
+                    Context c = (Context) getObjectField(param.thisObject, "mContext");
+                    if ((int) param.args[0] == c.getResources().getIdentifier("nowplaying_screen", "layout", GPM)) {
+                        log("Found layout");
+                        final XmlResourceParser parser = stripLayout(c.getResources(), (int) param.args[0]);
+                        //noinspection TryFinallyCanBeTryWithResources
+                        try {
+                            param.setResult(li.inflate(parser, (ViewGroup) param.args[1], (boolean) param.args[2]));
+                        } finally {
+                            parser.close();
+                        }
+                    }
+                }
+            });
+
+
             // Enable new playback/nowplaying screen | Since there are no new features, stay on the old on for now
             /*findAndHookMethod(GPM + "Feature", lPParam.classLoader, "isPlayback2Enabled", Context.class, new XC_MethodReplacement() {
                 @Override
@@ -98,7 +128,7 @@ public class NowPlaying {
                 }
             });*/
 
-            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "initializeView", new XC_MethodHook() {
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "onCreateView", LayoutInflater.class, ViewGroup.class, Bundle.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                     final View mQueueWrapper = ((View) getObjectField(param.thisObject, "mQueueWrapper"));
@@ -128,10 +158,10 @@ public class NowPlaying {
                 }
             });
 
-            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "setupPlayQueue", new XC_MethodHook() {
+            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, /*"setupPlayQueue"*/"access$2500", NOW_PLAYING_FRAGMENT, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    callMethod(getObjectField(param.thisObject, "mQueueAdapter"), "showAlbumArt", true);
+                    callMethod(getObjectField(param.args[0], "mQueueAdapter"), "showAlbumArt", true);
                 }
             });
 
@@ -142,6 +172,14 @@ public class NowPlaying {
                     if (mQueueWrapper.getTag(QUEUE_TAG_KEY) != null)
                         param.setResult(null);
                 }
+
+                // Tint queue button
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    if (PREFS.getBoolean(Common.NP_TINT_ICONS, false) && !isNewDesignEnabled()) {
+                        tintQueueButton(param.thisObject);
+                    }
+                }
             });
 
             // Icon tinting from cover Palette
@@ -149,16 +187,6 @@ public class NowPlaying {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     updateTint(param.thisObject);
-                }
-            });
-
-            // Tint queue button
-            findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "updateQueueSwitcherState", new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    if (PREFS.getBoolean(Common.NP_TINT_ICONS, false) && !isNewDesignEnabled()) {
-                        tintQueueButton(param.thisObject);
-                    }
                 }
             });
 
@@ -282,7 +310,27 @@ public class NowPlaying {
         }
     }
 
-    public static void initResources(XC_InitPackageResources.InitPackageResourcesParam resParam) {
+    /**
+     * The worst hack I've ever used, but it works :P
+     */
+    private static XmlResourceParser stripLayout(Resources res, @LayoutRes int id) {
+        try {
+            TypedValue value = new TypedValue();
+            res.getValue(id, value, true);
+            String result = value.string.toString();
+            if (!result.contains("w570dp")) {
+                assetCookieLayout = value.assetCookie;
+                return res.getLayout(id);
+            }
+            result = result.replace("-w570dp", "").replace("-v13", "");
+            return (XmlResourceParser) callMethod(res, "loadXmlResourceParser", result, id, assetCookieLayout != 0 ? assetCookieLayout : Integer.MIN_VALUE, "layout");
+        } catch (Throwable t) {
+            log(t);
+            return res.getLayout(id);
+        }
+    }
+
+    static void initResources(XC_InitPackageResources.InitPackageResourcesParam resParam) {
         try {
             // Replace overflow button
             resParam.res.setReplacement(GPM, "drawable", "ic_menu_moreoverflow_large", modRes.fwd(R.drawable.ic_more_vert_black_24dp));
@@ -474,6 +522,7 @@ public class NowPlaying {
                         View tabletAdsHeader = nowPlayingLayout.findViewById(res.getIdentifier("tablet_ads_header", "id", GPM));
                         if (tabletAdsHeader != null)
                             backup.addView(disconnect(tabletAdsHeader));
+                        backup.addView(disconnect(nowPlayingLayout.findViewById(res.getIdentifier("upsell_now_playing", "id", GPM))));
 
                         nowPlayingLayout.removeAllViews();
                         nowPlayingLayout.addView(backup, 0, 0);
@@ -618,6 +667,8 @@ public class NowPlaying {
                 }
                 // Tint all the rest
                 for (Object pager : new Object[]{getObjectField(nowPlayingFragment, "mHeaderPager"), artPager}) {
+                    if (pager == null)
+                        continue;
                     for (Object edgeEffectCompat : new Object[]{getObjectField(pager, "mLeftEdge"), getObjectField(pager, "mRightEdge")}) {
                         ((Paint) getObjectField(getObjectField(edgeEffectCompat, "mEdgeEffect"), "mPaint")).setColor(lastColor);
                     }

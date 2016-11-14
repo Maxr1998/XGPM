@@ -1,33 +1,20 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.content.ContentResolver;
 import android.content.Context;
 
-import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
-import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
-import static de.robv.android.xposed.XposedHelpers.findClass;
-import static de.robv.android.xposed.XposedHelpers.setStaticObjectField;
 
-public class Features {
+class Features {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
-            // Enable new adaptive home
-            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isAdaptiveHomeEnabled", Context.class, new XC_MethodReplacement() {
-                @Override
-                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
-                    return PREFS.getBoolean(Common.DRAWER_ENABLE_ADAPTIVE_HOME, false);
-                }
-            });
-            setStaticObjectField(findClass(GPM + ".sync.api.MusicUrl", lPParam.classLoader), "MUSIC_PA_URL_HOST", "https://mclients.googleapis.com/music");
-
             findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isFullWidthSearchEnabled", new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
@@ -36,13 +23,6 @@ public class Features {
             });
 
             findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isHeadphoneNotificationAvailableForUser", Context.class, new XC_MethodReplacement() {
-                @Override
-                protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
-                    return true;
-                }
-            });
-
-            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isHeadphoneNotificationBroadcastReceiverEnabled", Context.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
                     return true;
@@ -67,6 +47,18 @@ public class Features {
                 @Override
                 protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
                     return true;
+                }
+            });
+
+            // Gservices overrides
+            findAndHookMethod("com.google.android.gsf.Gservices", lPParam.classLoader, "getBoolean", ContentResolver.class, String.class, boolean.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    switch ((String) param.args[1]) {
+                        case "music_use_system_media_notificaion":
+                            param.setResult(true);
+                            break;
+                    }
                 }
             });
         } catch (Throwable t) {

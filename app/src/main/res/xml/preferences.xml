@@ -5,9 +5,15 @@
             android:key="default_my_library"
             android:title="@string/default_my_library" />
         <CheckBoxPreference
+            android:key="restore_old_mainstage"
+            android:summary="@string/restore_old_mainstage_summary"
+            android:title="@string/restore_old_mainstage" />
+        <CheckBoxPreference
+            android:dependency="restore_old_mainstage"
             android:key="remove_situations"
             android:title="@string/remove_situations" />
         <CheckBoxPreference
+            android:dependency="restore_old_mainstage"
             android:key="remove_recommendations"
             android:title="@string/remove_recommendations" />
         <MultiSelectListPreference
@@ -32,10 +38,6 @@
         <CheckBoxPreference
             android:key="drawer_hide_unlimited"
             android:title="@string/drawer_hide_unlimited" />
-        <CheckBoxPreference
-            android:key="drawer_enable_adaptive_home"
-            android:summary="@string/drawer_enable_adaptive_home_summary"
-            android:title="@string/drawer_enable_adaptive_home" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_now_playing">
         <CheckBoxPreference

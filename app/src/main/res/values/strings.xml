@@ -6,6 +6,8 @@
 
     <string name="category_main">Main</string>
     <string name="default_my_library">Show \"My Library\" as default screen</string>
+    <string name="restore_old_mainstage">Restore old mainstage screen</string>
+    <string name="restore_old_mainstage_summary">Replaces the new \"Adaptive\" home screen with the previous one</string>
     <string name="remove_situations">Remove \"Play Music for…\"</string>
     <string name="remove_recommendations">Remove recommendations</string>
     <string name="my_library_hidden_tabs">Hide \"My Library\" tabs</string>
@@ -33,14 +35,10 @@
         <item>Browse stations</item>
         <item>Downloaded only</item>
         <item>Shop</item>
-        <item>Send gift</item>
         <item>Help &amp; Feedback</item>
+        <item>Upgrade to family</item>
     </string-array>
     <string name="drawer_hide_unlimited">Hide subscription shortcut</string>
-    <string name="drawer_enable_adaptive_home">Enable Adaptive home [EXPERIMENTAL]</string>
-    <string name="drawer_enable_adaptive_home_summary">Adaptive home, codenamed \"Innerjam\", is a new homescreen currently developed by Google,
-        which will show recommendations, playlists and concerts near you. At the moment, the feature is missing the Google API URL, so it will only show a blank screen,
-        but it is likely that Google will enable it with a server side switch.</string>
 
     <string name="category_now_playing">Now playing screen</string>
     <string name="np_new_design">New design</string>
