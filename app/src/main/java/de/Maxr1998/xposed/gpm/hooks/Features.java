@@ -10,6 +10,8 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import static de.Maxr1998.xposed.gpm.Common.GPM;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
+import static de.robv.android.xposed.XposedHelpers.findClass;
+import static de.robv.android.xposed.XposedHelpers.setStaticBooleanField;
 
 class Features {
 
@@ -54,6 +56,9 @@ class Features {
                     }
                 }
             });
+
+            // Just trying out :P
+            setStaticBooleanField(findClass(GPM + ".Flag", lPParam.classLoader), "UI_TEST_BUILD", true);
         } catch (Throwable t) {
             log(t);
         }
