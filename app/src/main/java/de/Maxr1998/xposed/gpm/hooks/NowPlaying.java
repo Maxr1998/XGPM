@@ -503,14 +503,15 @@ class NowPlaying {
 
                         customTitleBar.addView(disconnect(headerPager), 0);
                         headerPager.getLayoutParams().height = customHeaderBar.getLayoutParams().height; // = 64dp
-                        headerPager.setBackgroundColor(0);
+                        headerPager.setBackgroundColor(Color.TRANSPARENT);
 
                         customPlaybackOptionsBar.addView(disconnect(repeat), WRAP_CONTENT, MATCH_PARENT);
                         ((ViewGroup.MarginLayoutParams) repeat.getLayoutParams()).rightMargin = (int) (16 * res.getDisplayMetrics().density);
                         customPlaybackOptionsBar.addView(disconnect(shuffle), WRAP_CONTENT, MATCH_PARENT);
 
                         customPlayControlsBar.addView(disconnect(playControls), MATCH_PARENT, MATCH_PARENT);
-                        playControls.setBackgroundColor(0);
+                        playControls.setBackgroundResource(0);
+                        playControls.findViewById(res.getIdentifier("ratingThumbs", "id", GPM)).setBackgroundResource(0);
 
                         FrameLayout backup = new FrameLayout(nowPlayingLayout.getContext());
                         backup.addView(disconnect(nowPlayingLayout.findViewById(res.getIdentifier("overlay_ads_view", "id", GPM))));
