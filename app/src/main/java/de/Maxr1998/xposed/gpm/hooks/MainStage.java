@@ -1,7 +1,6 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
-import android.content.Context;
-import android.widget.ListAdapter;
+import android.content.res.Resources;
 
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
@@ -10,9 +9,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import static de.Maxr1998.xposed.gpm.Common.GPM;
 import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
-import static de.robv.android.xposed.XposedHelpers.findAndHookConstructor;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
-import static de.robv.android.xposed.XposedHelpers.findClass;
 
 class MainStage {
 
@@ -41,23 +38,24 @@ class MainStage {
             });
 
             // 3 columns
-            findAndHookConstructor(GPM + ".ui.GridAdapterWrapper", lPParam.classLoader, Context.class, ListAdapter.class, int.class, new XC_MethodHook() {
+            findAndHookMethod(GPM + ".utils.ViewUtils", lPParam.classLoader, "getScreenColumnCount", Resources.class, new XC_MethodHook() {
                 @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     PREFS.reload();
-                    if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false) && findClass(GPM + ".ui.common.AlbumGridFragment", lPParam.classLoader).isInstance(param.thisObject)) {
-                        param.args[2] = (int) param.args[2] + 1;
+                    if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false)) {
+                        param.setResult((int) param.getResult() + 1);
                     }
                 }
             });
 
-            // 3 columns
-            findAndHookMethod(GPM + ".ui.common.MediaListRecyclerFragment", lPParam.classLoader, "getScreenColumns", new XC_MethodHook() {
+            findAndHookMethod(GPM + ".utils.ViewUtils", lPParam.classLoader, "getAdaptiveHomeScreenColumnCount", int.class, Resources.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
-                    if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false) && findClass(GPM + ".ui.MaterialRecentFragment", lPParam.classLoader).isInstance(param.thisObject)) {
-                        param.setResult((int) param.getResult() + 1);
+                    if ((int) param.args[0] == 1) {
+                        PREFS.reload();
+                        if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false)) {
+                            param.setResult((int) param.getResult() + 1);
+                        }
                     }
                 }
             });
