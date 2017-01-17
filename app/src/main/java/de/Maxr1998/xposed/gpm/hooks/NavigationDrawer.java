@@ -90,8 +90,8 @@ class NavigationDrawer {
                     Resources res = ((Activity) param.thisObject).getResources();
                     Object playlistsItem = Enum.valueOf(screenClass, "NO_CONTENT");
                     setIntField(playlistsItem, "mTitleResId", res.getIdentifier("top_menu_playlists", "string", GPM));
-                    setIntField(playlistsItem, "mIconResourceId", res.getIdentifier("ic_instant_mix_black", "drawable", GPM));
-                    setIntField(playlistsItem, "mSelectedIconResourceId", res.getIdentifier("ic_instant_mix_orange", "drawable", GPM));
+                    setIntField(playlistsItem, "mIconResourceId", res.getIdentifier("ic_reason_instantmix", "drawable", GPM));
+                    setIntField(playlistsItem, "mSelectedIconResourceId", res.getIdentifier("ic_reason_instantmix", "drawable", GPM));
                 }
             });
 

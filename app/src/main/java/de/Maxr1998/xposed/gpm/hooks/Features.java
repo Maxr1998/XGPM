@@ -29,13 +29,6 @@ class Features {
                 }
             });
 
-            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isLocalMessageAsBottomSheetsEnabled", new XC_MethodReplacement() {
-                @Override
-                protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
-                    return true;
-                }
-            });
-
             findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isSleepTimerEnabled", new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {

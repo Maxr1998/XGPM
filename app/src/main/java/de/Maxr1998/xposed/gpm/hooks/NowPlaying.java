@@ -273,7 +273,7 @@ class NowPlaying {
             });
 
             // Buttons
-            findAndHookMethod(PLAYBACK_CONTROLS, lPParam.classLoader, "refreshButtonImages", new XC_MethodHook() {
+            findAndHookMethod(PLAYBACK_CONTROLS, lPParam.classLoader, "refreshButtonsState", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     if (isNewDesignEnabled()) {
