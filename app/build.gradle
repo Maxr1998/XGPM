@@ -5,7 +5,7 @@ android {
         main
     }
     compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '25.0.2'
     defaultConfig {
         applicationId "de.Maxr1998.xposed.gpm"
         minSdkVersion 15
@@ -53,9 +53,9 @@ repositories {
     jcenter()
 }
 dependencies {
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
-    compile 'com.android.support:palette-v7:24.2.0'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:palette-v7:25.1.0'
     compile 'de.Maxr1998:track-selector-lib:1.1'
     provided 'de.robv.android.xposed:api:81'
     provided 'de.robv.android.xposed:api:81:sources'
