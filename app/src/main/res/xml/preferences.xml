@@ -28,6 +28,10 @@
             android:key="universal_art_replacer"
             android:summary="@string/universal_art_replacer_summary"
             android:title="@string/universal_art_replacer" />
+        <CheckBoxPreference
+            android:key="disable_audio_focus"
+            android:summary="@string/disable_audio_focus_summary"
+            android:title="@string/disable_audio_focus" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/category_drawer">
         <MultiSelectListPreference

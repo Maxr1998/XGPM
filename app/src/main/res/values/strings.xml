@@ -24,6 +24,8 @@
     <string name="universal_art_replacer_summary">Adds ability to replace any artist or album art in Google Play Music.
         You need to place an image file with exactly the same file name &amp; dimensions as in
         <i>/data/data/com.google.android.music/files/artwork/</i> in the <i>ArtCacheOverlay</i> folder on your sdcard.</string>
+    <string name="disable_audio_focus">Disable audio focus</string>
+    <string name="disable_audio_focus_summary">Don\'t allow GPM to gain audio focus, which would mean that other playing audio sources could stop or be stopped by GPM</string>
 
     <string name="category_drawer">Navigation drawer</string>
     <string name="nav_drawer_hide_items">Hide drawer items</string>

@@ -18,6 +18,7 @@ import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -97,6 +98,15 @@ class NowPlaying {
 
     static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
+            findAndHookMethod(AudioManager.class, "requestAudioFocus", AudioManager.OnAudioFocusChangeListener.class, int.class, int.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS.reload();
+                    if (PREFS.getBoolean(Common.DISABLE_AUDIO_FOCUS, false))
+                        param.setResult(AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+                }
+            });
+
             findAndHookMethod(LayoutInflater.class, "inflate", int.class, ViewGroup.class, boolean.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
