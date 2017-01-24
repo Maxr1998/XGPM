@@ -57,6 +57,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
         NavigationDrawer.init(lPParam);
         NowPlaying.init(lPParam);
         TrackList.init(lPParam);
+        Misc.init(lPParam);
 
         // External
         ArtReplacer.init(lPParam);
