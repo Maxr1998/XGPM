@@ -37,10 +37,6 @@
         <item>Upgrade to family</item>
     </string-array>
     <string name="drawer_hide_unlimited">Nascondi il link di abbonamento</string>
-    <string name="drawer_enable_adaptive_home">Abilita Home adattiva [SPERIMENTALE]</string>
-    <string name="drawer_enable_adaptive_home_summary">La home adattiva, chiamata \"Innerjam\", è una nuova home sviluppata da Google
-        che mostra suggerimenti, playlist e conscerti vicino a te. Al momento la funzione non è attiva sul servere mostra una schermata vuota,
-        ma è possibile che Google la abiliti.</string>
 
     <string name="category_now_playing">Schermata di riproduzione</string>
     <string name="np_new_design">Nuovo Design</string>
@@ -57,8 +53,6 @@
     <string name="category_notification">Notifiche</string>
     <string name="notification_narrow">Usa il vecchio design</string>
     <string name="notification_narrow_summary">Rimuovi i pollici e mostra la cover in grande\nNB. Lollipop e superiori</string>
-    <!--<string name="np_voice_control">Aggiungi comandi vocali</string>
-    <string name="np_voice_control_summary">Aggiungi i comandi vocali nella schermata di riproduzione</string>-->
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Nascondi XGPM dal launcher</string>

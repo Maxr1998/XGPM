@@ -57,8 +57,6 @@
     <string name="category_notification">Notification</string>
     <string name="notification_narrow">Use old notification design</string>
     <string name="notification_narrow_summary">Remove thumbs up and down actions, show big album art\nNote: Only works on Android Lollipop and above</string>
-    <!--<string name="np_voice_control">Add Voice Commands</string>
-    <string name="np_voice_control_summary">Add voice commands shortcut next to the queue button</string>-->
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Hide XGPM from launcher</string>

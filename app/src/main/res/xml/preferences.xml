@@ -62,10 +62,6 @@
             android:dependency="np_new_design"
             android:key="np_remove_drop_shadow"
             android:title="@string/np_remove_drop_shadow" />
-        <!--<CheckBoxPreference
-            android:key="np_voice_control"
-            android:summary="@string/np_voice_control_summary"
-            android:title="@string/np_voice_control" />-->
         <CheckBoxPreference
             android:key="np_add_eq"
             android:summary="@string/np_add_eq_summary"
