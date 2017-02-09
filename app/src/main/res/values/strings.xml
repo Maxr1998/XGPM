@@ -59,8 +59,6 @@
     <string name="notification_narrow_summary">Remove thumbs up and down actions, show big album art\nNote: Only works on Android Lollipop and above</string>
     <!--<string name="np_voice_control">Add Voice Commands</string>
     <string name="np_voice_control_summary">Add voice commands shortcut next to the queue button</string>-->
-    <string name="np_no_album_art">No Album Arts in Track Selector</string>
-    <string name="np_no_album_art_summary">Loading album arts requires some time, so you can completely disable it here.\nBy default, it already loads only 81 covers.</string>
 
     <string name="category_xgpm">XGPM</string>
     <string name="hide_from_launcher">Hide XGPM from launcher</string>
