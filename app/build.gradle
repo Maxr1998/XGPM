@@ -53,9 +53,9 @@ repositories {
     jcenter()
 }
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:palette-v7:25.1.0'
+    compile 'com.android.support:appcompat-v7:25.1.1'
+    compile 'com.android.support:design:25.1.1'
+    compile 'com.android.support:palette-v7:25.1.1'
     provided 'de.robv.android.xposed:api:81'
     provided 'de.robv.android.xposed:api:81:sources'
 }
