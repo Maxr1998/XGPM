@@ -36,7 +36,7 @@ class NavigationDrawer {
             final Class homeMenuScreensClass = findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader);
 
             // Set default pane
-            findAndHookMethod(screenClass, "getDefaultScreen", new XC_MethodHook() {
+            findAndHookMethod(screenClass, "getHomeScreen", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     PREFS.reload();
