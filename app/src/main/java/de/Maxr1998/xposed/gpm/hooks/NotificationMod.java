@@ -27,7 +27,6 @@ class NotificationMod {
             findAndHookMethod(GPM + ".playback.MusicPlaybackService", lPParam.classLoader, "addLNotificationAction", Notification.Builder.class, Notification.WearableExtender.class, int.class, int.class, int.class, PendingIntent.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.NOTIFICATION_NARROW, false)) {
                         // Set flag
                         Bundle extra = new Bundle(1);

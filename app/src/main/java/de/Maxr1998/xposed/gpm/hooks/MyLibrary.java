@@ -21,7 +21,6 @@ class MyLibrary {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     if (param.thisObject.getClass().getSimpleName().equals("MyLibraryFragment")) {
-                        PREFS.reload();
                         List tabs = (List) param.args[0];
                         for (int i = 0; i < tabs.size(); i++) {
                             String className = ((Class) getObjectField(getObjectField(tabs.get(i), "mFragmentInfo"), "mFragmentClass")).getSimpleName();

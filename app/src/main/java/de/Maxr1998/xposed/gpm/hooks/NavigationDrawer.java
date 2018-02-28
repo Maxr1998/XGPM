@@ -39,7 +39,6 @@ class NavigationDrawer {
             findAndHookMethod(screenClass, "getHomeScreen", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.DEFAULT_MY_LIBRARY, false)) {
                         param.setResult(XposedHelpers.getStaticObjectField(screenClass, "MY_LIBRARY"));
                     } else if (PREFS.getBoolean(Common.RESTORE_OLD_MAINSTAGE, false)) {
@@ -52,7 +51,6 @@ class NavigationDrawer {
             findAndHookMethod(homeMenuScreensClass, "getMenuScreens", Context.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     ArrayList<Object> screens = (ArrayList<Object>) param.getResult();
                     screens.set(0, Enum.valueOf(screenClass, PREFS.getBoolean(Common.RESTORE_OLD_MAINSTAGE, false) ? "MAINSTAGE" : "ADAPTIVE_HOME"));
                     for (int i = 0; i < screens.size(); i++) {
@@ -126,7 +124,6 @@ class NavigationDrawer {
                     List.class, playDrawer + ".PlayDrawerLayout.PlayDrawerDownloadSwitchConfig", List.class, new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            PREFS.reload();
                             if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.<String>emptySet()).contains("downloaded_only")) {
                                 param.args[3] = null;
                             }
@@ -137,7 +134,6 @@ class NavigationDrawer {
             findAndHookMethod(GPM + ".ui.BaseActivity", lPParam.classLoader, "updateMusicDrawer", new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.DRAWER_HIDE_UNLIMITED, false)) {
                         ((View) getObjectField(getObjectField(param.thisObject, "mPlayDrawerLayout"), "mDockedActionView")).setVisibility(View.GONE);
                     }

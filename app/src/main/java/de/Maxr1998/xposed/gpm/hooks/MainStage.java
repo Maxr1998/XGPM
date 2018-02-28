@@ -19,7 +19,6 @@ class MainStage {
             findAndHookMethod(GPM + ".ui.MaterialMainstageFragment.RecyclerAdapter", lPParam.classLoader, "showSituationCard", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.REMOVE_SITUATIONS, false)) {
                         param.setResult(false);
                     }
@@ -30,7 +29,6 @@ class MainStage {
             findAndHookMethod(GPM + ".ui.MaterialMainstageFragment.RecyclerAdapter", lPParam.classLoader, "shouldShowRecommendationCluster", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.REMOVE_RECOMMENDATIONS, false)) {
                         param.setResult(false);
                     }
@@ -41,7 +39,6 @@ class MainStage {
             findAndHookMethod(GPM + ".utils.ViewUtils", lPParam.classLoader, "getScreenColumnCount", Resources.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false)) {
                         param.setResult((int) param.getResult() + 1);
                     }
@@ -52,7 +49,6 @@ class MainStage {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     if ((int) param.args[0] == 1) {
-                        PREFS.reload();
                         if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false)) {
                             param.setResult((int) param.getResult() + 1);
                         }

@@ -23,7 +23,6 @@ class Misc {
             findAndHookMethod(AudioManager.class, "requestAudioFocus", AudioManager.OnAudioFocusChangeListener.class, int.class, int.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (PREFS.getBoolean(Common.DISABLE_AUDIO_FOCUS, false))
                         param.setResult(AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
                 }

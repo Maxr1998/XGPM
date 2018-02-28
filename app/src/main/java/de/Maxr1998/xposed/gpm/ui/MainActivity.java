@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            getPreferenceManager().setSharedPreferencesMode(Context.MODE_WORLD_READABLE);
             addPreferencesFromResource(R.xml.preferences);
 
             mainComponent = new ComponentName(getActivity(), getActivity().getApplication().getPackageName() + ".Main");

@@ -100,7 +100,6 @@ class NowPlaying {
             findAndHookMethod(LayoutInflater.class, "inflate", int.class, ViewGroup.class, boolean.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    PREFS.reload();
                     if (!isNewDesignEnabled()) {
                         return;
                     }
@@ -194,8 +193,7 @@ class NowPlaying {
             findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "onExpandingStateChanged", EXPANDING_SCROLL_VIEW, EXPANDING_STATE, EXPANDING_STATE, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
-                    PREFS.reload();
-                    View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
+                                        View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
                     View EQ_BUTTON_ID_TMP = ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID);
                     if (EQ_BUTTON_ID_TMP != null)
                         EQ_BUTTON_ID_TMP.setVisibility(queueSwitcher.getVisibility());
@@ -350,8 +348,7 @@ class NowPlaying {
             resParam.res.hookLayout(GPM, "layout", "nowplaying_screen", new XC_LayoutInflated() {
                 @Override
                 public void handleLayoutInflated(final LayoutInflatedParam lIParam) throws Throwable {
-                    PREFS.reload();
-                    final XResources res = lIParam.res;
+                                        final XResources res = lIParam.res;
 
                     // Views
                     final RelativeLayout nowPlayingLayout = (RelativeLayout) lIParam.view;
@@ -563,8 +560,7 @@ class NowPlaying {
             resParam.res.hookLayout(GPM, "layout", "nowplaying_header_page", new XC_LayoutInflated() {
                 @Override
                 public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
-                    PREFS.reload();
-                    if (isNewDesignEnabled()) {
+                                        if (isNewDesignEnabled()) {
                         ((View) lIParam.view.findViewById(lIParam.res.getIdentifier("album_small", "id", GPM)).getParent()).setVisibility(View.GONE);
                         ((LinearLayout.LayoutParams) lIParam.view.findViewById(lIParam.res.getIdentifier("header_text", "id", GPM))
                                 .getLayoutParams()).leftMargin = (int) (16 * lIParam.res.getDisplayMetrics().density);
@@ -578,8 +574,7 @@ class NowPlaying {
             resParam.res.hookLayout(GPM, "layout", "nowplaying_art_page", new XC_LayoutInflated() {
                 @Override
                 public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
-                    PREFS.reload();
-                    if (PREFS.getBoolean(Common.NP_HIDE_YT_ICONS, false)) {
+                                        if (PREFS.getBoolean(Common.NP_HIDE_YT_ICONS, false)) {
                         RelativeLayout root = (RelativeLayout) lIParam.view;
                         FrameLayout backup = new FrameLayout(root.getContext());
                         backup.addView(disconnect(root.findViewById(root.getResources().getIdentifier("youtube_overlay", "id", GPM))));

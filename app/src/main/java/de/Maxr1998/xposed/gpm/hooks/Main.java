@@ -2,7 +2,10 @@ package de.Maxr1998.xposed.gpm.hooks;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
+
+import com.crossbowffs.remotepreferences.RemotePreferences;
 
 import de.Maxr1998.xposed.gpm.BuildConfig;
 import de.Maxr1998.xposed.gpm.Common;
@@ -11,7 +14,6 @@ import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.callbacks.XC_InitPackageResources;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
@@ -23,33 +25,27 @@ import static de.robv.android.xposed.XposedHelpers.findClass;
 public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPackageResources {
 
     public static String MODULE_PATH = null;
-    public static XSharedPreferences PREFS;
+    public static SharedPreferences PREFS;
 
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
         MODULE_PATH = startupParam.modulePath;
-        PREFS = new XSharedPreferences(Common.XGPM, Common.XGPM + "_preferences");
-        PREFS.makeWorldReadable();
     }
 
     @Override
-    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lPParam) throws Throwable {
         if (lPParam.packageName.equals(GPM)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                doHooks(lPParam);
-            } else {
-                findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
-                    @Override
-                    protected void afterHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
-                        doHooks(lPParam);
-                    }
-                });
-            }
+            findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    PREFS = new RemotePreferences((Context) param.args[0], Common.PREFERENCE_PROVIDER_AUTHORITY, Common.XGPM + "_preferences");
+                    doHooks(lPParam);
+                }
+            });
         }
     }
 
     private void doHooks(XC_LoadPackage.LoadPackageParam lPParam) {
-        PREFS.reload();
         // UI
         Features.init(lPParam);
         MainStage.init(lPParam);
@@ -83,8 +79,7 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
     @Override
     public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
         if (resParam.packageName.equals(GPM)) {
-            PREFS.reload();
-            NowPlaying.initResources(resParam);
+            //NowPlaying.initResources(resParam);
         }
     }
 }
