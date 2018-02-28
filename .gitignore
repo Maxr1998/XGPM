@@ -1,6 +1,6 @@
 # Generated files
-build/
-app/build
+*build/
+captures/
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -18,13 +18,12 @@ lint.xml
 .idea/
 
 # Gradle
-gradle/
-.gradle/
-gradlew*
+/.gradle/
 
 # Gedit save files
 *.*~
 
+# Private files
+app/src/main/res/values-v16/private.xml
 # KeyStore + Passwords
-app/sMaxr1998_key.jks
-app/keyStore.properties
+keyStore.properties

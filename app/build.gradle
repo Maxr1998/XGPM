@@ -1,61 +1,65 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.jakewharton.hugo'
+
+ext.supportLibraryVersion = "27.0.2"
 
 android {
-    signingConfigs {
-        main
-    }
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 27
     defaultConfig {
         applicationId "de.Maxr1998.xposed.gpm"
-        minSdkVersion 15
-        targetSdkVersion 25
+        minSdkVersion 21
+        targetSdkVersion 27
         versionCode 29
         versionName "1.12.1"
         resConfigs "en", "it"
-        vectorDrawables {
-            generatedDensities = ["hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]
-        }
+        setProperty("archivesBaseName", "XGPM-$versionName")
+
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.main
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-conf.txt'
+            debuggable false
             minifyEnabled true
             shrinkResources true
-            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.main
             debuggable true
+            versionNameSuffix "-beta"
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     lintOptions {
         abortOnError false
+    }
+    androidExtensions {
+        experimental = true
     }
 }
 
 def propFile = project.file("keyStore.properties")
 if (propFile.exists()) {
-    def props = new Properties()
+    Properties props = new Properties()
     props.load(new FileInputStream(propFile))
-    android.signingConfigs.main.storeFile project.file(props.keyStore)
-    android.signingConfigs.main.storePassword props.keyStorePassword
-    android.signingConfigs.main.keyAlias props.keyAlias
-    android.signingConfigs.main.keyPassword props.keyPassword
+    def main = android.signingConfigs.create("main")
+    main.storeFile project.file(props["keyStore"])
+    main.storePassword props["keyStorePassword"]
+    main.keyAlias props["keyAlias"]
+    main.keyPassword props["keyPassword"]
+
+    android.buildTypes.release.signingConfig = main
+    android.buildTypes.debug.signingConfig = main
 }
 
-repositories {
-    jcenter()
-}
 dependencies {
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    compile 'com.android.support:design:25.1.1'
-    compile 'com.android.support:palette-v7:25.1.1'
-    provided 'de.robv.android.xposed:api:81'
-    provided 'de.robv.android.xposed:api:81:sources'
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+    implementation "com.android.support:design:$supportLibraryVersion"
+    implementation "com.android.support:palette-v7:$supportLibraryVersion"
+    compileOnly 'de.robv.android.xposed:api:82'
+    compileOnly 'de.robv.android.xposed:api:82:sources'
 }
