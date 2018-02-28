@@ -15,6 +15,7 @@ import static de.robv.android.xposed.XposedHelpers.getStaticObjectField;
 import static de.robv.android.xposed.XposedHelpers.setObjectField;
 import static de.robv.android.xposed.XposedHelpers.setStaticBooleanField;
 
+@SuppressWarnings("RedundantThrows")
 class Features {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {

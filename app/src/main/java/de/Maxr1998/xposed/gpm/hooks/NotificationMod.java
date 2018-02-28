@@ -19,6 +19,7 @@ import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+@SuppressWarnings("RedundantThrows")
 class NotificationMod {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {

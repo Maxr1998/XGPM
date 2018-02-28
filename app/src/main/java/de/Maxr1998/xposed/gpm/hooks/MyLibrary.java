@@ -13,6 +13,7 @@ import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
+@SuppressWarnings("RedundantThrows")
 class MyLibrary {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
@@ -24,7 +25,7 @@ class MyLibrary {
                         List tabs = (List) param.args[0];
                         for (int i = 0; i < tabs.size(); i++) {
                             String className = ((Class) getObjectField(getObjectField(tabs.get(i), "mFragmentInfo"), "mFragmentClass")).getSimpleName();
-                            if (PREFS.getStringSet(Common.MY_LIBRARY_HIDDEN_TABS, Collections.<String>emptySet()).contains(className)) {
+                            if (PREFS.getStringSet(Common.MY_LIBRARY_HIDDEN_TABS, Collections.emptySet()).contains(className)) {
                                 tabs.remove(i--);
                             }
                         }

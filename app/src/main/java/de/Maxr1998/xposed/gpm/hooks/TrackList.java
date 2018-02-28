@@ -18,6 +18,7 @@ import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getLongField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 
+@SuppressWarnings("RedundantThrows")
 public class TrackList {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
@@ -29,22 +30,19 @@ public class TrackList {
                         protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                             final Context context = (Context) callMethod(param.thisObject, "getActivity");
                             final Object headerView = getObjectField(param.thisObject, "mMaterialHeader");
-                            View.OnClickListener openArtistPage = new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    final Object meta = getObjectField(param.thisObject, "mDetailsMetadata");
-                                    final Object songList = getObjectField(headerView, "mSongList");
-                                    final boolean isNautilus = findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(songList);
-                                    final Class artistPageActivity = findClass(GPM + ".ui.mylibrary.ArtistPageActivity", lPParam.classLoader);
-                                    final long artistId = getLongField(meta, "artistId");
-                                    final String secondaryTitle = (String) getObjectField(meta, "secondaryTitle");
-                                    if (isNautilus) {
-                                        callStaticMethod(artistPageActivity, "showNautilusArtist", new Class[]{Context.class, String.class, String.class},
-                                                context, getObjectField(meta, "metajamArtistId"), secondaryTitle);
-                                    } else if (artistId != -1) {
-                                        callStaticMethod(artistPageActivity, "showArtist", new Class[]{Context.class, Long.class, String.class, Boolean.class},
-                                                context, artistId, secondaryTitle, true);
-                                    }
+                            View.OnClickListener openArtistPage = view -> {
+                                final Object meta = getObjectField(param.thisObject, "mDetailsMetadata");
+                                final Object songList = getObjectField(headerView, "mSongList");
+                                final boolean isNautilus = findClass(GPM + ".medialist.ExternalSongList", lPParam.classLoader).isInstance(songList);
+                                final Class artistPageActivity = findClass(GPM + ".ui.mylibrary.ArtistPageActivity", lPParam.classLoader);
+                                final long artistId = getLongField(meta, "artistId");
+                                final String secondaryTitle = (String) getObjectField(meta, "secondaryTitle");
+                                if (isNautilus) {
+                                    callStaticMethod(artistPageActivity, "showNautilusArtist", new Class[]{Context.class, String.class, String.class},
+                                            context, getObjectField(meta, "metajamArtistId"), secondaryTitle);
+                                } else if (artistId != -1) {
+                                    callStaticMethod(artistPageActivity, "showArtist", new Class[]{Context.class, Long.class, String.class, Boolean.class},
+                                            context, artistId, secondaryTitle, true);
                                 }
                             };
                             View artistImage = (View) getObjectField(headerView, "mAvatar");

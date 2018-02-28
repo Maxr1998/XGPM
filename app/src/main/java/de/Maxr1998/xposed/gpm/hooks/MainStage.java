@@ -11,6 +11,7 @@ import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
+@SuppressWarnings("RedundantThrows")
 class MainStage {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {

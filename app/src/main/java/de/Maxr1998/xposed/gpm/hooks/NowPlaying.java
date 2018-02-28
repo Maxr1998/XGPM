@@ -70,6 +70,7 @@ import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.getStaticObjectField;
 import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 
+@SuppressWarnings("RedundantThrows")
 class NowPlaying {
 
     private static final XModuleResources modRes = createInstance(MODULE_PATH, null);
@@ -140,18 +141,15 @@ class NowPlaying {
                         final int customProgressBarId = modRes.getIdentifier("progress_bar", "id", XGPM);
                         final int customPlayControlsBarId = modRes.getIdentifier("play_controls_bar", "id", XGPM);
                         final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mQueueWrapper.getLayoutParams();
-                        ((View) getObjectField(param.thisObject, "mQueueSwitcher")).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                boolean wasQueueShown = getBooleanField(param.thisObject, "mQueueShown");
-                                setBooleanField(param.thisObject, "mQueueShown", !wasQueueShown);
-                                boolean isQueueShown = !wasQueueShown;
-                                mQueuePlayingFromHeaderView.setVisibility(isQueueShown ? View.VISIBLE : View.GONE);
-                                mQueueWrapper.getRootView().findViewById(customProgressBarId).setVisibility(isQueueShown ? View.GONE : View.VISIBLE);
-                                layoutParams.addRule(RelativeLayout.ABOVE, isQueueShown ? customPlayControlsBarId : customProgressBarId);
-                                mQueueWrapper.requestLayout();
-                                callMethod(getObjectField(param.thisObject, "mQueue"), "scrollToNowPlaying");
-                            }
+                        ((View) getObjectField(param.thisObject, "mQueueSwitcher")).setOnClickListener(view -> {
+                            boolean wasQueueShown = getBooleanField(param.thisObject, "mQueueShown");
+                            setBooleanField(param.thisObject, "mQueueShown", !wasQueueShown);
+                            boolean isQueueShown = !wasQueueShown;
+                            mQueuePlayingFromHeaderView.setVisibility(isQueueShown ? View.VISIBLE : View.GONE);
+                            mQueueWrapper.getRootView().findViewById(customProgressBarId).setVisibility(isQueueShown ? View.GONE : View.VISIBLE);
+                            layoutParams.addRule(RelativeLayout.ABOVE, isQueueShown ? customPlayControlsBarId : customProgressBarId);
+                            mQueueWrapper.requestLayout();
+                            callMethod(getObjectField(param.thisObject, "mQueue"), "scrollToNowPlaying");
                         });
                     }
                 }
@@ -193,7 +191,7 @@ class NowPlaying {
             findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "onExpandingStateChanged", EXPANDING_SCROLL_VIEW, EXPANDING_STATE, EXPANDING_STATE, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
-                                        View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
+                    View queueSwitcher = (View) getObjectField(param.thisObject, "mQueueSwitcher");
                     View EQ_BUTTON_ID_TMP = ((View) queueSwitcher.getParent()).findViewById(EQ_BUTTON_ID);
                     if (EQ_BUTTON_ID_TMP != null)
                         EQ_BUTTON_ID_TMP.setVisibility(queueSwitcher.getVisibility());
@@ -211,12 +209,12 @@ class NowPlaying {
                         System.out.println("Moving " + param.args[1].toString());
                         ViewGroup root = (ViewGroup) getObjectField(param.thisObject, "mRootView");
                         Resources res = root.getResources();
-                        RelativeLayout customHeaderBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
+                        RelativeLayout customHeaderBar = root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
                         if (customHeaderBar != null) {
                             float ratio = (float) param.args[2];
                             customHeaderBar.setBackgroundColor(ColorUtils.blendARGB(Color.WHITE, lastColor, ratio));
 
-                            RelativeLayout customTitleBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("title_bar", "id", XGPM));
+                            RelativeLayout customTitleBar = root.findViewById(modRes.getIdentifier("title_bar", "id", XGPM));
                             View headerPager = root.findViewById(res.getIdentifier("header_pager", "id", GPM));
                             if (headerPager == null)
                                 headerPager = root.findViewById(res.getIdentifier("tablet_header", "id", GPM));
@@ -348,7 +346,7 @@ class NowPlaying {
             resParam.res.hookLayout(GPM, "layout", "nowplaying_screen", new XC_LayoutInflated() {
                 @Override
                 public void handleLayoutInflated(final LayoutInflatedParam lIParam) throws Throwable {
-                                        final XResources res = lIParam.res;
+                    final XResources res = lIParam.res;
 
                     // Views
                     final RelativeLayout nowPlayingLayout = (RelativeLayout) lIParam.view;
@@ -367,15 +365,15 @@ class NowPlaying {
                     if (headerPager == null)
                         headerPager = nowPlayingLayout.findViewById(tabletHeaderId);
                     View tabletPlaybackControlsWrapper = nowPlayingLayout.findViewById(tabletPlayControlsId);
-                    RelativeLayout topWrapperRight = (RelativeLayout) nowPlayingLayout.findViewById(topWrapperId);
+                    RelativeLayout topWrapperRight = nowPlayingLayout.findViewById(topWrapperId);
                     View queueSwitcher = topWrapperRight.findViewById(queueSwitcherId);
                     View artPager = nowPlayingLayout.findViewById(artPagerId);
                     RelativeLayout.LayoutParams artPagerLayoutParams = (RelativeLayout.LayoutParams) artPager.getLayoutParams();
-                    LinearLayout playQueueWrapper = (LinearLayout) nowPlayingLayout.findViewById(playQueueWrapperId);
-                    ImageView repeat = (ImageView) nowPlayingLayout.findViewById(repeatId),
-                            shuffle = (ImageView) nowPlayingLayout.findViewById(shuffleId);
+                    LinearLayout playQueueWrapper = nowPlayingLayout.findViewById(playQueueWrapperId);
+                    ImageView repeat = nowPlayingLayout.findViewById(repeatId),
+                            shuffle = nowPlayingLayout.findViewById(shuffleId);
                     View progress = nowPlayingLayout.findViewById(android.R.id.progress);
-                    RelativeLayout playControls = (RelativeLayout) nowPlayingLayout.findViewById(playControlsId);
+                    RelativeLayout playControls = nowPlayingLayout.findViewById(playControlsId);
 
                     // Add EQ button
                     if (PREFS.getBoolean(Common.NP_ADD_EQ_SHORTCUT, false)) {
@@ -389,23 +387,20 @@ class NowPlaying {
                         //noinspection deprecation
                         eqButton.setImageDrawable(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? modRes.getDrawable(R.drawable.ic_equalizer_black_24dp, null) : modRes.getDrawable(R.drawable.ic_equalizer_black_24dp));
                         eqButton.setScaleType(ImageView.ScaleType.CENTER);
-                        eqButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                Intent eqIntent = new Intent("android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL");
-                                int i = (int) callStaticMethod(findClass(GPM + ".utils.MusicUtils", view.getContext().getClassLoader()), "getAudioSessionId", view.getContext());
-                                if (i != -1) {
-                                    eqIntent.putExtra("android.media.extra.AUDIO_SESSION", i);
-                                } else {
-                                    Log.w("MusicSettings", "Failed to get valid audio session id");
-                                }
-                                try {
-                                    ((Activity) view.getContext()).startActivityForResult(eqIntent, 26);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    Toast.makeText(view.getContext(), "Couldn't find an Equalizer app. Try to install Viper4Android, DSP Manager or similar", Toast.LENGTH_SHORT).show();
-                                    view.setVisibility(View.GONE);
-                                }
+                        eqButton.setOnClickListener(view -> {
+                            Intent eqIntent = new Intent("android.media.action.DISPLAY_AUDIO_EFFECT_CONTROL_PANEL");
+                            int i = (int) callStaticMethod(findClass(GPM + ".utils.MusicUtils", view.getContext().getClassLoader()), "getAudioSessionId", view.getContext());
+                            if (i != -1) {
+                                eqIntent.putExtra("android.media.extra.AUDIO_SESSION", i);
+                            } else {
+                                Log.w("MusicSettings", "Failed to get valid audio session id");
+                            }
+                            try {
+                                ((Activity) view.getContext()).startActivityForResult(eqIntent, 26);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(view.getContext(), "Couldn't find an Equalizer app. Try to install Viper4Android, DSP Manager or similar", Toast.LENGTH_SHORT).show();
+                                view.setVisibility(View.GONE);
                             }
                         });
                         topWrapperRight.addView(eqButton, 1);
@@ -426,19 +421,14 @@ class NowPlaying {
                         int customTitleBarId = modRes.getIdentifier("title_bar", "id", XGPM);
                         int customPlaybackOptionsBarId = modRes.getIdentifier("playback_options_bar", "id", XGPM);
                         int customPlayControlsBarId = modRes.getIdentifier("play_controls_bar", "id", XGPM);
-                        RelativeLayout customHeaderBar = (RelativeLayout) customLayout.findViewById(customHeaderBarId);
-                        LinearLayout customMainContainer = (LinearLayout) customLayout.findViewById(customMainContainerId);
-                        RelativeLayout customProgressBar = (RelativeLayout) customLayout.findViewById(customProgressBarId);
-                        RelativeLayout customTitleBar = (RelativeLayout) customLayout.findViewById(customTitleBarId);
-                        LinearLayout customPlaybackOptionsBar = (LinearLayout) customTitleBar.findViewById(customPlaybackOptionsBarId);
-                        RelativeLayout customPlayControlsBar = (RelativeLayout) customLayout.findViewById(customPlayControlsBarId);
+                        RelativeLayout customHeaderBar = customLayout.findViewById(customHeaderBarId);
+                        LinearLayout customMainContainer = customLayout.findViewById(customMainContainerId);
+                        RelativeLayout customProgressBar = customLayout.findViewById(customProgressBarId);
+                        RelativeLayout customTitleBar = customLayout.findViewById(customTitleBarId);
+                        LinearLayout customPlaybackOptionsBar = customTitleBar.findViewById(customPlaybackOptionsBarId);
+                        RelativeLayout customPlayControlsBar = customLayout.findViewById(customPlayControlsBarId);
 
-                        customHeaderBar.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                callMethod(getStaticObjectField(findClass("android.support.v4.content.LocalBroadcastManager", v.getContext().getApplicationContext().getClassLoader()), "mInstance"), "sendBroadcast", new Intent("com.google.android.music.nowplaying.HEADER_CLICKED"));
-                            }
-                        });
+                        customHeaderBar.setOnClickListener(v -> callMethod(getStaticObjectField(findClass("android.support.v4.content.LocalBroadcastManager", v.getContext().getApplicationContext().getClassLoader()), "mInstance"), "sendBroadcast", new Intent("com.google.android.music.nowplaying.HEADER_CLICKED")));
                         customHeaderBar.addView(disconnect(topWrapperRight));
 
                         if (tabletPlaybackControlsWrapper != null) {
@@ -463,13 +453,10 @@ class NowPlaying {
 
                         LinearLayout.LayoutParams customArtPagerLayoutParams = portrait ? new LinearLayout.LayoutParams(MATCH_PARENT, 0) : new LinearLayout.LayoutParams(0, MATCH_PARENT);
                         customMainContainer.addView(disconnect(artPager), 0, customArtPagerLayoutParams);
-                        artPager.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                            @Override
-                            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                                if (portrait)
-                                    v.getLayoutParams().height = v.getMeasuredWidth();
-                                else v.getLayoutParams().width = v.getMeasuredHeight();
-                            }
+                        artPager.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                            if (portrait)
+                                v.getLayoutParams().height = v.getMeasuredWidth();
+                            else v.getLayoutParams().width = v.getMeasuredHeight();
                         });
 
                         RelativeLayout.LayoutParams playQueueWrapperLayoutParams = (RelativeLayout.LayoutParams) playQueueWrapper.getLayoutParams();
@@ -560,7 +547,7 @@ class NowPlaying {
             resParam.res.hookLayout(GPM, "layout", "nowplaying_header_page", new XC_LayoutInflated() {
                 @Override
                 public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
-                                        if (isNewDesignEnabled()) {
+                    if (isNewDesignEnabled()) {
                         ((View) lIParam.view.findViewById(lIParam.res.getIdentifier("album_small", "id", GPM)).getParent()).setVisibility(View.GONE);
                         ((LinearLayout.LayoutParams) lIParam.view.findViewById(lIParam.res.getIdentifier("header_text", "id", GPM))
                                 .getLayoutParams()).leftMargin = (int) (16 * lIParam.res.getDisplayMetrics().density);
@@ -574,7 +561,7 @@ class NowPlaying {
             resParam.res.hookLayout(GPM, "layout", "nowplaying_art_page", new XC_LayoutInflated() {
                 @Override
                 public void handleLayoutInflated(LayoutInflatedParam lIParam) throws Throwable {
-                                        if (PREFS.getBoolean(Common.NP_HIDE_YT_ICONS, false)) {
+                    if (PREFS.getBoolean(Common.NP_HIDE_YT_ICONS, false)) {
                         RelativeLayout root = (RelativeLayout) lIParam.view;
                         FrameLayout backup = new FrameLayout(root.getContext());
                         backup.addView(disconnect(root.findViewById(root.getResources().getIdentifier("youtube_overlay", "id", GPM))));
@@ -609,6 +596,7 @@ class NowPlaying {
             ViewGroup root = (ViewGroup) getObjectField(nowPlayingFragment, "mRootView");
             Object currentState = getObjectField(nowPlayingFragment, "mCurrentState");
             Class exStateClass = findClass(EXPANDING_STATE, nowPlayingFragment.getClass().getClassLoader());
+            //noinspection unchecked
             if (currentState == Enum.valueOf(exStateClass, "FULLY_EXPANDED")) {
                 Object artPager = getObjectField(nowPlayingFragment, "mArtPager");
                 ArrayList<?> mItems = (ArrayList<?>) getObjectField(artPager, "mItems");
@@ -626,14 +614,11 @@ class NowPlaying {
                         Palette coverPalette = Palette.from(((BitmapDrawable) mAlbum.getDrawable()).getBitmap()).maximumColorCount(16).generate();
                         lastColor = coverPalette.getVibrantColor(Color.parseColor("#9E9E9E"));
                     } else {
-                        ((Handler) getObjectField(nowPlayingFragment, "mHandler")).postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    updateTint(nowPlayingFragment);
-                                } catch (Throwable t) {
-                                    log(t);
-                                }
+                        ((Handler) getObjectField(nowPlayingFragment, "mHandler")).postDelayed(() -> {
+                            try {
+                                updateTint(nowPlayingFragment);
+                            } catch (Throwable t) {
+                                log(t);
                             }
                         }, 200);
                         return;
@@ -641,7 +626,7 @@ class NowPlaying {
                 }
                 if (isNewDesignEnabled()) {
                     // Tint header bar & its items
-                    RelativeLayout customHeaderBar = (RelativeLayout) root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
+                    RelativeLayout customHeaderBar = root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
                     if (customHeaderBar != null) {
                         customHeaderBar.setBackgroundColor(lastColor);
                         RelativeLayout wrapper = (RelativeLayout) customHeaderBar.getChildAt(0);
@@ -677,7 +662,7 @@ class NowPlaying {
                     AnimatedStateListDrawable thumb = (AnimatedStateListDrawable) seekBar.getThumb();
                     thumb.setColorFilter(lastColor, PorterDuff.Mode.SRC_IN);
                 }
-                ImageButton playPause = (ImageButton) root.findViewById(root.getResources().getIdentifier("pause", "id", GPM));
+                ImageButton playPause = root.findViewById(root.getResources().getIdentifier("pause", "id", GPM));
                 playPause.getBackground().setColorFilter(lastColor, PorterDuff.Mode.SRC_ATOP);
             }
         }

@@ -26,6 +26,7 @@ import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
 import static de.robv.android.xposed.XposedHelpers.setIntField;
 
+@SuppressWarnings("RedundantThrows")
 class NavigationDrawer {
 
     @SuppressWarnings("unchecked")
@@ -62,7 +63,7 @@ class NavigationDrawer {
                             if (PREFS.getBoolean(Common.DEFAULT_MY_LIBRARY, false)) {
                                 screens.add(0, screens.remove(i));
                             }
-                        } else if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.<String>emptySet()).contains(tag)) {
+                        } else if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.emptySet()).contains(tag)) {
                             screens.remove(i);
                             i--;
                         }
@@ -124,7 +125,7 @@ class NavigationDrawer {
                     List.class, playDrawer + ".PlayDrawerLayout.PlayDrawerDownloadSwitchConfig", List.class, new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.<String>emptySet()).contains("downloaded_only")) {
+                            if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.emptySet()).contains("downloaded_only")) {
                                 param.args[3] = null;
                             }
                         }

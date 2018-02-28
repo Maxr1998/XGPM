@@ -22,10 +22,11 @@ import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 
+@SuppressWarnings("RedundantThrows")
 public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPackageResources {
 
-    public static String MODULE_PATH = null;
-    public static SharedPreferences PREFS;
+    static String MODULE_PATH = null;
+    static SharedPreferences PREFS;
 
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
@@ -78,8 +79,8 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
 
     @Override
     public void handleInitPackageResources(XC_InitPackageResources.InitPackageResourcesParam resParam) throws Throwable {
-        if (resParam.packageName.equals(GPM)) {
-            //NowPlaying.initResources(resParam);
-        }
+        /*if (resParam.packageName.equals(GPM)) {
+            NowPlaying.initResources(resParam);
+        }*/
     }
 }

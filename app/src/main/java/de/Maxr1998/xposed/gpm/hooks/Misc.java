@@ -15,6 +15,7 @@ import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
 import static de.robv.android.xposed.XposedHelpers.getStaticObjectField;
 
+@SuppressWarnings("RedundantThrows")
 class Misc {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {

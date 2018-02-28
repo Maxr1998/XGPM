@@ -15,6 +15,7 @@ import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
+@SuppressWarnings("RedundantThrows")
 public class ArtReplacer {
 
     public static void init(XC_LoadPackage.LoadPackageParam lPParam) {
