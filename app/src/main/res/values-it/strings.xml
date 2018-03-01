@@ -26,6 +26,7 @@
     <string name="category_drawer">Drawer</string>
     <string name="nav_drawer_hide_items">Nascondi elementi del drawer</string>
     <string-array name="nav_drawer_items_desc">
+        <item>Recents</item>
         <item>Top charts</item>
         <item>Nuove uscite</item>
         <item>Playlist</item>

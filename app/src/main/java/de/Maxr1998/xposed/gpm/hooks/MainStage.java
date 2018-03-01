@@ -1,7 +1,10 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
+import android.content.res.Resources;
+
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
@@ -14,6 +17,14 @@ class MainStage {
 
     public static void init(final XC_LoadPackage.LoadPackageParam lPParam) {
         try {
+            // Restore old mainstage
+            findAndHookMethod(GPM + ".Feature", lPParam.classLoader, "isAdaptiveHomeEnabled", new XC_MethodReplacement() {
+                @Override
+                protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
+                    return !PREFS.getBoolean(Common.RESTORE_OLD_MAINSTAGE, false);
+                }
+            });
+
             // Remove "Play Music for…"
             findAndHookMethod(GPM + ".ui.MaterialMainstageFragment.RecyclerAdapter", lPParam.classLoader, "showSituationCard", new XC_MethodHook() {
                 @Override
@@ -34,8 +45,8 @@ class MainStage {
                 }
             });
 
-            /*/ 3 columns
-            findAndHookMethod(GPM + ".utils.ViewUtils", lPParam.classLoader, "getScreenColumnCount", Resources.class, new XC_MethodHook() {
+            // 3 columns
+            findAndHookMethod(GPM + ".ui.utils.ViewUtils", lPParam.classLoader, "getScreenColumnCount", Resources.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     if (PREFS.getBoolean(Common.ALBUM_GRID_THREE_COLUMNS, false)) {
@@ -44,7 +55,7 @@ class MainStage {
                 }
             });
 
-            findAndHookMethod(GPM + ".utils.ViewUtils", lPParam.classLoader, "getAdaptiveHomeScreenColumnCount", int.class, Resources.class, new XC_MethodHook() {
+            findAndHookMethod(GPM + ".ui.adaptivehome.AdaptiveHomeUtils", lPParam.classLoader, "getAdaptiveHomeScreenColumnCount", int.class, Resources.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     if ((int) param.args[0] == 1) {
@@ -53,7 +64,7 @@ class MainStage {
                         }
                     }
                 }
-            });*/
+            });
         } catch (Throwable t) {
             log(t);
         }

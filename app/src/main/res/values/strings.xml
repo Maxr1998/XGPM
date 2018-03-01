@@ -6,7 +6,7 @@
 
     <string name="category_main">Main</string>
     <string name="default_my_library">Show \"My Library\" as default screen</string>
-    <string name="restore_old_mainstage">Restore old mainstage screen</string>
+    <string name="restore_old_mainstage">Disable Adaptive Home</string>
     <string name="restore_old_mainstage_summary">Replaces the new \"Adaptive\" home screen with the previous one</string>
     <string name="remove_situations">Remove \"Play Music for…\"</string>
     <string name="remove_recommendations">Remove recommendations</string>
@@ -30,6 +30,7 @@
     <string name="category_drawer">Navigation drawer</string>
     <string name="nav_drawer_hide_items">Hide drawer items</string>
     <string-array name="nav_drawer_items_desc">
+        <item>Recents</item>
         <item>Top charts</item>
         <item>New releases</item>
         <item>Playlists</item>

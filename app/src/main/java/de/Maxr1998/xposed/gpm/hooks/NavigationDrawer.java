@@ -36,18 +36,6 @@ class NavigationDrawer {
             final Class screenClass = findClass(GPM + ".ui.HomeActivity.Screen", lPParam.classLoader);
             final Class homeMenuScreensClass = findClass(GPM + ".ui.HomeMenuScreens", lPParam.classLoader);
 
-            // Set default pane
-            findAndHookMethod(screenClass, "getHomeScreen", new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    if (PREFS.getBoolean(Common.DEFAULT_MY_LIBRARY, false)) {
-                        param.setResult(XposedHelpers.getStaticObjectField(screenClass, "MY_LIBRARY"));
-                    } else if (PREFS.getBoolean(Common.RESTORE_OLD_MAINSTAGE, false)) {
-                        param.setResult(Enum.valueOf(screenClass, "MAINSTAGE"));
-                    }
-                }
-            });
-
             // Remove disabled drawer items
             findAndHookMethod(homeMenuScreensClass, "getMenuScreens", Context.class, new XC_MethodHook() {
                 @Override
@@ -59,10 +47,6 @@ class NavigationDrawer {
                         if (tag.equals("library")) {
                             // Required to show playlist item
                             screens.add(i + 1, Enum.valueOf(screenClass, "NO_CONTENT"));
-                            // Move my library to top when default
-                            if (PREFS.getBoolean(Common.DEFAULT_MY_LIBRARY, false)) {
-                                screens.add(0, screens.remove(i));
-                            }
                         } else if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.emptySet()).contains(tag)) {
                             screens.remove(i);
                             i--;
@@ -88,7 +72,7 @@ class NavigationDrawer {
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     Resources res = ((Activity) param.thisObject).getResources();
                     Object playlistsItem = Enum.valueOf(screenClass, "NO_CONTENT");
-                    setIntField(playlistsItem, "mTitleResId", res.getIdentifier("top_menu_playlists", "string", GPM));
+                    setIntField(playlistsItem, "mTitleResId", res.getIdentifier("playlists_title", "string", GPM));
                     setIntField(playlistsItem, "mIconResourceId", res.getIdentifier("ic_reason_instantmix", "drawable", GPM));
                     setIntField(playlistsItem, "mSelectedIconResourceId", res.getIdentifier("ic_reason_instantmix", "drawable", GPM));
                 }
@@ -120,16 +104,18 @@ class NavigationDrawer {
             });
 
             // Remove "Downloaded only" item
-            String playDrawer = "com.google.android.play.drawer";
-            findAndHookMethod(playDrawer + ".PlayDrawerAdapter", lPParam.classLoader, "updateContent", String.class, Account[].class,
-                    List.class, playDrawer + ".PlayDrawerLayout.PlayDrawerDownloadSwitchConfig", List.class, new XC_MethodHook() {
-                        @Override
-                        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                            if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.emptySet()).contains("downloaded_only")) {
-                                param.args[3] = null;
+            final String playDrawer = "com.google.android.play.drawer.";
+            for (String hookedClass : new String[]{"PlayDrawerListViewAdapter", "PlayDrawerRecyclerViewAdapter"}) {
+                findAndHookMethod(playDrawer + hookedClass, lPParam.classLoader, "updateContent", String.class, Account[].class,
+                        List.class, playDrawer + "PlayDrawerLayout.PlayDrawerDownloadSwitchConfig", List.class, new XC_MethodHook() {
+                            @Override
+                            protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                                if (PREFS.getStringSet(Common.NAV_DRAWER_HIDDEN_ITEMS, Collections.emptySet()).contains("downloaded_only")) {
+                                    param.args[3] = null;
+                                }
                             }
-                        }
-                    });
+                        });
+            }
 
             // Remove "Get Unlimited Music"
             findAndHookMethod(GPM + ".ui.BaseActivity", lPParam.classLoader, "updateMusicDrawer", new XC_MethodHook() {

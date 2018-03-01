@@ -9,7 +9,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "de.Maxr1998.xposed.gpm"
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 29
         versionName "1.12.1"

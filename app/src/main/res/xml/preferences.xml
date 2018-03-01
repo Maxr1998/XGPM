@@ -2,9 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="@string/category_main">
         <CheckBoxPreference
-            android:key="default_my_library"
-            android:title="@string/default_my_library" />
-        <CheckBoxPreference
             android:key="restore_old_mainstage"
             android:summary="@string/restore_old_mainstage_summary"
             android:title="@string/restore_old_mainstage" />
