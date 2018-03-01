@@ -1,7 +1,5 @@
 package de.Maxr1998.xposed.gpm.hooks;
 
-import android.content.res.Resources;
-
 import de.Maxr1998.xposed.gpm.Common;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -36,7 +34,7 @@ class MainStage {
                 }
             });
 
-            // 3 columns
+            /*/ 3 columns
             findAndHookMethod(GPM + ".utils.ViewUtils", lPParam.classLoader, "getScreenColumnCount", Resources.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -55,7 +53,7 @@ class MainStage {
                         }
                     }
                 }
-            });
+            });*/
         } catch (Throwable t) {
             log(t);
         }

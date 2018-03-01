@@ -48,18 +48,18 @@ public class Main implements IXposedHookZygoteInit, IXposedHookLoadPackage, IXpo
 
     private void doHooks(XC_LoadPackage.LoadPackageParam lPParam) {
         // UI
-        Features.init(lPParam);
+        //Features.init(lPParam);
         MainStage.init(lPParam);
         MyLibrary.init(lPParam);
-        NavigationDrawer.init(lPParam);
-        NowPlaying.init(lPParam);
-        TrackList.init(lPParam);
+        //NavigationDrawer.init(lPParam);
+        //NowPlaying.init(lPParam);
+        //TrackList.init(lPParam);
         Misc.init(lPParam);
 
         // External
-        ArtReplacer.init(lPParam);
+        //ArtReplacer.init(lPParam);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            NotificationMod.init(lPParam);
+            //NotificationMod.init(lPParam);
         }
 
         // Debug
