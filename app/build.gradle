@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jakewharton.hugo'
 
-ext.supportLibraryVersion = "27.0.2"
+ext.supportLibraryVersion = "27.1.0"
 
 android {
     compileSdkVersion 27
@@ -57,6 +57,10 @@ if (propFile.exists()) {
 }
 
 dependencies {
+    // Kotlin support
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation 'androidx.core:core-ktx:0.2'
+    // Support libraries
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
     implementation "com.android.support:palette-v7:$supportLibraryVersion"
