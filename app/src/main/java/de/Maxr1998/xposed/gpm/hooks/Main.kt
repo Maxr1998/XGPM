@@ -3,6 +3,7 @@ package de.Maxr1998.xposed.gpm.hooks
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.XModuleResources
 import android.os.Build
 import com.crossbowffs.remotepreferences.RemotePreferences
 import de.Maxr1998.xposed.gpm.BuildConfig
@@ -19,6 +20,7 @@ class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPacka
     @Throws(Throwable::class)
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
         MODULE_PATH = startupParam.modulePath
+        modRes = XModuleResources.createInstance(MODULE_PATH, null)
     }
 
     @Throws(Throwable::class)
@@ -33,8 +35,8 @@ class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPacka
                     MainStage.init(lPParam)
                     MyLibrary.init(lPParam)
                     NavigationDrawer.init(lPParam)
-                    //NowPlaying.init(lPParam);
-                    //TrackList.init(lPParam);
+                    NowPlaying.init(lPParam)
+                    TrackList.init(lPParam)
                     Misc.init(lPParam)
 
                     // External
@@ -63,9 +65,11 @@ class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPacka
 
     @Throws(Throwable::class)
     override fun handleInitPackageResources(resParam: XC_InitPackageResources.InitPackageResourcesParam) {
-        /*if (resParam.packageName.equals(GPM)) {
-            NowPlaying.initResources(resParam);
-        }*/
+        if (resParam.packageName == GPM) {
+            systemContext?.let {
+                NowPlayingResources.initResources(resParam, it.getRemotePreferences())
+            }
+        }
     }
 
     companion object {
@@ -73,6 +77,8 @@ class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPacka
         var MODULE_PATH: String? = null
         @JvmField
         var PREFS: SharedPreferences? = null
+        @JvmField
+        var modRes: XModuleResources? = null
 
 
         // #############################################################################
