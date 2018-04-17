@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.jakewharton.hugo'
 
-ext.supportLibraryVersion = "27.1.0"
+ext.supportLibraryVersion = "27.1.1"
 
 android {
     compileSdkVersion 27
@@ -37,9 +37,6 @@ android {
     lintOptions {
         abortOnError false
     }
-    androidExtensions {
-        experimental = true
-    }
 }
 
 def propFile = project.file("keyStore.properties")
@@ -59,7 +56,7 @@ if (propFile.exists()) {
 dependencies {
     // Kotlin support
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-    implementation 'androidx.core:core-ktx:0.2'
+    implementation 'androidx.core:core-ktx:0.3'
     // Support libraries
     implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
     implementation "com.android.support:design:$supportLibraryVersion"
