@@ -15,6 +15,7 @@ import de.robv.android.xposed.XposedHelpers.*
 import de.robv.android.xposed.callbacks.XC_InitPackageResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 
+
 class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPackageResources {
 
     @Throws(Throwable::class)
@@ -48,7 +49,7 @@ class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPacka
                     // Debug
                     if (BuildConfig.DEBUG) {
                         try {
-                            findAndHookMethod(GPM + ".utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass(GPM + ".utils.DebugUtils.MusicTag", lPParam.classLoader), object : XC_MethodReplacement() {
+                            findAndHookMethod("$GPM.utils.DebugUtils", lPParam.classLoader, "isLoggable", findClass("$GPM.utils.DebugUtils.MusicTag", lPParam.classLoader), object : XC_MethodReplacement() {
                                 @Throws(Throwable::class)
                                 override fun replaceHookedMethod(methodHookParam: MethodHookParam): Any {
                                     return true
@@ -60,14 +61,24 @@ class Main : IXposedHookZygoteInit, IXposedHookLoadPackage, IXposedHookInitPacka
                     }
                 }
             })
-        }
+        }/* else if (lPParam.packageName == "android" && Build.DEVICE == "mako") {
+            hookAllMethods(Process::class.java, "start", object : XC_MethodHook() {
+                @Throws(Throwable::class)
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val flags = param.args[5] as Int
+                    param.args[5] = flags or 0x1
+                }
+            })
+            findAndHookMethod("com.android.server.wm.WindowManagerService", lPParam.classLoader, "isSystemSecure",
+                    XC_MethodReplacement.returnConstant(true))
+        }*/
     }
 
     @Throws(Throwable::class)
     override fun handleInitPackageResources(resParam: XC_InitPackageResources.InitPackageResourcesParam) {
         if (resParam.packageName == GPM) {
             systemContext?.let {
-                NowPlayingResources.initResources(resParam, it.getRemotePreferences())
+                initNowPlaying(resParam, it.getRemotePreferences())
             }
         }
     }

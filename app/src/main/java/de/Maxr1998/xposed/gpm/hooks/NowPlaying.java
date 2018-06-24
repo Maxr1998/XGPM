@@ -17,8 +17,6 @@ import android.support.v7.graphics.Palette;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -32,15 +30,12 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.Maxr1998.xposed.gpm.Common.GPM;
-import static de.Maxr1998.xposed.gpm.Common.XGPM;
 import static de.Maxr1998.xposed.gpm.UtilsKt.removeFromParent;
 import static de.Maxr1998.xposed.gpm.hooks.Main.PREFS;
-import static de.Maxr1998.xposed.gpm.hooks.Main.modRes;
 import static de.robv.android.xposed.XposedBridge.log;
 import static de.robv.android.xposed.XposedHelpers.callMethod;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 import static de.robv.android.xposed.XposedHelpers.findClass;
-import static de.robv.android.xposed.XposedHelpers.findMethodBestMatch;
 import static de.robv.android.xposed.XposedHelpers.getBooleanField;
 import static de.robv.android.xposed.XposedHelpers.getIntField;
 import static de.robv.android.xposed.XposedHelpers.getObjectField;
@@ -49,7 +44,6 @@ import static de.robv.android.xposed.XposedHelpers.setBooleanField;
 @SuppressWarnings("RedundantThrows")
 class NowPlaying {
     static final int EQ_BUTTON_ID = 0xE01;
-    static final int MEDIA_ROUTE_PICKER_WRAPPER_ID = 0x2ED;
     static final int QUEUE_TAG_KEY = 0xffffffff;
     // Classes
     private static final String NOW_PLAYING_FRAGMENT = GPM + ".ui.nowplaying2.NowPlayingControllerFragment";
@@ -68,7 +62,7 @@ class NowPlaying {
             /**
              * The worst hack I've ever used, but it works..
              */
-            final String resourceClass = Resources.class.getName() + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? "Impl" : "");
+            /*final String resourceClass = Resources.class.getName() + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? "Impl" : "");
             findAndHookMethod(findClass(resourceClass, lPParam.classLoader), "loadXmlResourceParser",
                     String.class, int.class, int.class, String.class, new XC_MethodHook() {
                         @Override
@@ -92,7 +86,7 @@ class NowPlaying {
                         setBooleanField(param.thisObject, "mIsTablet", false);
                     }
                 }
-            });
+            });*/
 
             findAndHookMethod(NOW_PLAYING_FRAGMENT, lPParam.classLoader, "onCreateView", LayoutInflater.class, ViewGroup.class, Bundle.class, new XC_MethodHook() {
                 @Override
@@ -103,17 +97,11 @@ class NowPlaying {
 
                         final View mQueuePlayingFromHeaderView = (View) getObjectField(param.thisObject, "mQueuePlayingFromHeaderView");
                         mQueuePlayingFromHeaderView.setVisibility(View.GONE);
-
-                        final int customProgressBarId = modRes.getIdentifier("progress_bar", "id", XGPM);
-                        final int customPlayControlsBarId = modRes.getIdentifier("play_controls_bar", "id", XGPM);
-                        final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mQueueWrapper.getLayoutParams();
                         ((View) getObjectField(param.thisObject, "mQueueSwitcher")).setOnClickListener(view -> {
                             boolean wasQueueShown = getBooleanField(param.thisObject, "mQueueShown");
                             setBooleanField(param.thisObject, "mQueueShown", !wasQueueShown);
                             boolean isQueueShown = !wasQueueShown;
                             mQueuePlayingFromHeaderView.setVisibility(isQueueShown ? View.VISIBLE : View.GONE);
-                            mQueueWrapper.getRootView().findViewById(customProgressBarId).setVisibility(isQueueShown ? View.GONE : View.VISIBLE);
-                            layoutParams.addRule(RelativeLayout.ABOVE, isQueueShown ? customPlayControlsBarId : customProgressBarId);
                             mQueueWrapper.requestLayout();
                             callMethod(getObjectField(param.thisObject, "mQueue"), "scrollToNowPlaying");
                         });
@@ -164,7 +152,8 @@ class NowPlaying {
                     if (EQ_BUTTON_ID_TMP != null)
                         EQ_BUTTON_ID_TMP.setVisibility(queueSwitcher.getVisibility());
                     if (isNewDesignEnabled()) {
-                        ((View) getObjectField(param.thisObject, "mRootView")).findViewById(MEDIA_ROUTE_PICKER_WRAPPER_ID).setVisibility(queueSwitcher.getVisibility());
+                        ((View) getObjectField(param.thisObject, "mRootView")).findViewById(NowPlayingHelper.INSTANCE.getMediaRouteWrapperId())
+                                .setVisibility(queueSwitcher.getVisibility());
                     }
                     updateTint(param.thisObject);
                 }
@@ -174,36 +163,36 @@ class NowPlaying {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                     if (isNewDesignEnabled() && !param.args[1].toString().equals("HIDDEN")) {
-                        System.out.println("Moving " + param.args[1].toString());
                         ViewGroup root = (ViewGroup) getObjectField(param.thisObject, "mRootView");
                         Resources res = root.getResources();
-                        RelativeLayout customHeaderBar = root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
+                        RelativeLayout customHeaderBar = root.findViewById(NowPlayingHelper.INSTANCE.getHeaderBarId());
                         if (customHeaderBar != null) {
                             float ratio = (float) param.args[2];
                             customHeaderBar.setBackgroundColor(ColorUtils.blendARGB(Color.WHITE, lastColor, ratio));
 
-                            RelativeLayout customTitleBar = root.findViewById(modRes.getIdentifier("title_bar", "id", XGPM));
+                            FrameLayout customTitleBar = root.findViewById(NowPlayingHelper.INSTANCE.getTitleBarId());
                             View headerPager = root.findViewById(res.getIdentifier("header_pager", "id", GPM));
                             if (headerPager == null)
-                                headerPager = root.findViewById(res.getIdentifier("tablet_header", "id", GPM));
-                            Class[] addViewInnerParams = new Class[]{View.class, int.class, ViewGroup.LayoutParams.class, boolean.class};
-                            if (ratio > 0.6f) {
-                                headerPager.setAlpha(1f);
-                                if (headerPager.getParent() != customTitleBar) {
-                                    customTitleBar.invalidate();
-                                    removeFromParent(headerPager, false);
-                                    findMethodBestMatch(ViewGroup.class, "addViewInner", addViewInnerParams)
-                                            .invoke(customTitleBar, headerPager, -1, headerPager.getLayoutParams(), false);
+                                return;//headerPager = root.findViewById(res.getIdentifier("tablet_header", "id", GPM));
+                            View parent = (View) headerPager.getParent();
+                            if (parent != null)
+                                if (ratio > 0.6f) {
+                                    headerPager.setAlpha(1f);
+                                    if (parent.getId() != NowPlayingHelper.INSTANCE.getTitleBarId()) {
+                                        NowPlayingHelper.INSTANCE.getAddViewInner().invoke(customTitleBar,
+                                                removeFromParent(headerPager, false), 0, headerPager.getLayoutParams(), false);
+                                    }
+                                    if (ratio == 1f)
+                                        headerPager.requestLayout();
+                                } else {
+                                    if (parent.getId() != NowPlayingHelper.INSTANCE.getHeaderBarId()) {
+                                        NowPlayingHelper.INSTANCE.getAddViewInner().invoke(customHeaderBar,
+                                                removeFromParent(headerPager, false), 0, headerPager.getLayoutParams(), false);
+                                    }
+                                    headerPager.setAlpha((float) Math.pow(1f - ratio, 6));
+                                    if (ratio == 0f)
+                                        headerPager.requestLayout();
                                 }
-                            } else {
-                                if (headerPager.getParent() != customHeaderBar) {
-                                    customHeaderBar.invalidate();
-                                    removeFromParent(headerPager, false);
-                                    findMethodBestMatch(ViewGroup.class, "addViewInner", addViewInnerParams)
-                                            .invoke(customHeaderBar, headerPager, -1, headerPager.getLayoutParams(), false);
-                                }
-                                headerPager.setAlpha((float) Math.pow(1f - ratio, 6));
-                            }
                         }
                     }
                 }
@@ -218,7 +207,7 @@ class NowPlaying {
                 }
             });
 
-            findAndHookMethod(NOW_PLAYING_FRAGMENT + "$NowPlayingHeaderPageAdapter", lPParam.classLoader, "onPageScrolled", int.class, float.class, int.class, new XC_MethodHook() {
+            /*findAndHookMethod(NOW_PLAYING_FRAGMENT + "$NowPlayingHeaderPageAdapter", lPParam.classLoader, "onPageScrolled", int.class, float.class, int.class, new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                     if (isNewDesignEnabled()) {
@@ -246,7 +235,7 @@ class NowPlaying {
                         setBooleanField(param.thisObject, "mIsTabletExperience", false);
                     }
                 }
-            });
+            });*/
 
             findAndHookMethod(PLAYBACK_CONTROLS, lPParam.classLoader, "setRepeatButtonImage", int.class, new XC_MethodHook() {
                 @Override
@@ -311,7 +300,7 @@ class NowPlaying {
                 }
                 if (isNewDesignEnabled()) {
                     // Tint header bar & its items
-                    RelativeLayout customHeaderBar = root.findViewById(modRes.getIdentifier("header_bar", "id", XGPM));
+                    RelativeLayout customHeaderBar = root.findViewById(NowPlayingHelper.INSTANCE.getHeaderBarId());
                     if (customHeaderBar != null) {
                         customHeaderBar.setBackgroundColor(lastColor);
                         RelativeLayout wrapper = (RelativeLayout) customHeaderBar.getChildAt(0);

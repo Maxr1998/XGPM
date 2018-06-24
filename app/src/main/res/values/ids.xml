@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="custom_header_bar" type="id" />
+    <item name="custom_title_bar" type="id" />
+    <item name="media_route_wrapper" type="id" />
+    <item name="play_queue_wrapper" type="id" />
+</resources>
