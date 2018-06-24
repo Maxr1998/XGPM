@@ -1,4 +1,4 @@
-## XGPM
+## XGPM -- \**abandoned*\*
 *…mods for Google Play Music*
 
 This module adds a few modifications to the Google Play Music app. It allows you to
@@ -21,4 +21,13 @@ This module adds a few modifications to the Google Play Music app. It allows you
 
 ***
 
-<img src="https://raw.githubusercontent.com/Maxr1998/XGPM/master/Screenshots/NowPlaying.png" width="360" height="640">
+## Project status
+As I recently switched to Spotify, and University and other projects
+are taking up much of my time, I am abandoning this project.
+Additionally, with Google having released YT Music, I'm expecting that
+Google will gradually phase out GPM this or next year, so there is no
+reason to keep this app alive anymore.
+
+If you want to contribute fixes/patches, I'll happily accept PRs though.
+Currently, most features still work, but e.g. the fancy NowPlaying screen
+has a lot of issues, especially in landscape.
